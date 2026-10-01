@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Boston Site/Civil — Operations & Resource Management Hub</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f5f9; }
+    ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none">
+
+  <!-- ========================================== -->
+  <!-- EXECUTIVE SECURITY GATEWAY / LOCK SCREEN   -->
+  <!-- ========================================== -->
+  <div id="authGate" class="fixed inset-0 z-50 bg-[#07172b] flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-[#0b2545] border border-slate-700/60 rounded-2xl shadow-2xl p-8 text-center text-white relative overflow-hidden">
+      <!-- Top Accent Bar -->
+      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400"></div>
+      
+      <div class="w-14 h-14 bg-blue-600/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
+        <i data-lucide="shield-check" class="w-8 h-8"></i>
+      </div>
+
+      <span class="text-[10px] tracking-widest font-black uppercase text-blue-400 bg-blue-950/80 px-2.5 py-1 rounded border border-blue-800/60 inline-block mb-2">Restricted Access</span>
+      <h2 class="text-xl font-bold tracking-tight text-white">BOSTON SITE/CIVIL</h2>
+      <p class="text-xs text-slate-300 mt-1 mb-6">Operations & Resource Management Application</p>
+
+      <form onsubmit="handleAuth(event)" class="space-y-4">
+        <div class="text-left">
+          <label class="block text-[11px] font-semibold text-slate-300 uppercase tracking-wider mb-1.5">Enter Authorization Passcode</label>
+          <div class="relative">
+            <input type="password" id="passcodeInput" required placeholder="••••••••••••••" autofocus class="w-full px-4 py-2.5 bg-slate-900/80 border border-slate-700 rounded-xl text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 tracking-wider font-mono transition" />
+            <button type="button" onclick="togglePassVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-200">
+              <i data-lucide="eye" id="passEyeIcon" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <p id="authError" class="text-xs text-rose-400 mt-2 font-medium hidden flex items-center gap-1">
+            <i data-lucide="alert-circle" class="w-3.5 h-3.5 inline"></i> Incorrect passcode. Access denied.
+          </p>
+        </div>
+
+        <button type="submit" class="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl text-xs uppercase tracking-wider shadow-lg shadow-blue-600/30 transition">
+          Unlock Operations Hub
+        </button>
+      </form>
+
+      <p class="text-[10px] text-slate-400 mt-6">Authorized Personnel Only • Langan Site/Civil Division</p>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TOP APP HEADER                             -->
+  <!-- ========================================== -->
+  <header class="bg-[#0b2545] text-white shadow-md sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
+      <div class="flex items-center space-x-3">
+        <div class="bg-blue-600 text-white p-2 rounded-lg font-black tracking-wider text-sm shadow">LEES</div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white flex items-center gap-2">
+            BOSTON SITE/CIVIL 
+            <span class="text-xs bg-blue-900 text-blue-200 px-2 py-0.5 rounded font-normal uppercase tracking-wider">Resource App</span>
+          </h1>
+          <p class="text-xs text-slate-300">Operational Allocation, Capacity & Projected Burn Management</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="flex items-center space-x-2">
+        <button onclick="lockApp()" title="Lock application" class="px-2.5 py-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded transition border border-slate-700 flex items-center gap-1.5">
+          <i data-lucide="lock" class="w-3.5 h-3.5"></i> Lock
+        </button>
+        <button onclick="resetDataPrompt()" title="Reset to initial data" class="px-2.5 py-1.5 text-xs text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded transition border border-slate-700">
+          Reset Data
+        </button>
+        <button onclick="exportJSON()" class="px-3 py-1.5 text-xs text-white bg-blue-700 hover:bg-blue-600 rounded transition font-medium flex items-center gap-1 shadow-sm">
+          <i data-lucide="download" class="w-3.5 h-3.5"></i> Export Backup
+        </button>
+      </div>
+    </div>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 border-t border-slate-700/60 overflow-x-auto">
+      <button onclick="switchTab('tab-projects')" id="nav-tab-projects" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-blue-400 text-white flex items-center gap-2 transition">
+        <i data-lucide="folder-kanban" class="w-4 h-4"></i> Tab 1: Project Hub
+      </button>
+      <button onclick="switchTab('tab-pods')" id="nav-tab-pods" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+        <i data-lucide="users" class="w-4 h-4"></i> Tab 2: Pods & Staff Studio
+      </button>
+      <button onclick="switchTab('tab-summary')" id="nav-tab-summary" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Tab 3: Summary Dashboard
+      </button>
+      <button onclick="switchTab('tab-workload')" id="nav-tab-workload" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+        <i data-lucide="calendar-clock" class="w-4 h-4"></i> Tab 4: Weekly Hours Matrix
+      </button>
+      <button onclick="switchTab('tab-burn')" id="nav-tab-burn" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
+        <i data-lucide="dollar-sign" class="w-4 h-4"></i> Tab 5: Projected Burn Report
+      </button>
+    </nav>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
+
+    <!-- ========================================== -->
+    <!-- TAB 1: PROJECTS HUB -->
+    <!-- ========================================== -->
+    <div id="tab-projects" class="tab-content space-y-4">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Active Project Directory</h2>
+          <p class="text-xs text-slate-500">Configure Executive oversight, Project Manager assignment, and Pod allocation.</p>
+        </div>
+        <div class="flex items-center gap-3">
+          <input type="text" id="projectSearch" oninput="renderProjectsTable()" placeholder="Search project name..." class="px-3 py-2 text-xs border border-slate-300 rounded-lg w-56 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <button onclick="openModal('addProjectModal')" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+            <i data-lucide="plus-circle" class="w-4 h-4"></i> ADD NEW PROJECT
+          </button>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto max-h-[680px]">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-200">
+              <tr>
+                <th class="py-3 px-4">#</th>
+                <th class="py-3 px-4">Project Name</th>
+                <th class="py-3 px-4">Executive Oversight</th>
+                <th class="py-3 px-4">Project Manager</th>
+                <th class="py-3 px-4">Assigned Delivery Pod</th>
+                <th class="py-3 px-4 text-center">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="projectsTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 2: PODS & STAFF CONFIGURATION -->
+    <!-- ========================================== -->
+    <div id="tab-pods" class="tab-content hidden space-y-6">
+      
+      <!-- Delivery Pods Section -->
+      <div>
+        <div class="flex justify-between items-center mb-3">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Delivery Pod Formations (8 Pods)</h2>
+            <p class="text-xs text-slate-500">Modify Pod leads, senior staff, and staff engineers dynamically.</p>
+          </div>
+        </div>
+
+        <div id="podsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <hr class="border-slate-200" />
+
+      <!-- Personnel Directory & Billing Rates -->
+      <div class="space-y-3">
+        <div class="flex justify-between items-center">
+          <div>
+            <h2 class="text-base font-bold text-slate-900">Personnel Directory & Rate Cards (18 Staff)</h2>
+            <p class="text-xs text-slate-500">Upload individual photos and configure hourly billing rates ($/hr).</p>
+          </div>
+          <span class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium">Auto-saves to browser</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5" id="staffDirectoryGrid">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 3: EXECUTIVE SUMMARY DASHBOARD -->
+    <!-- ========================================== -->
+    <div id="tab-summary" class="tab-content hidden space-y-6">
+      
+      <!-- Metric Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Active Projects</p>
+          <p class="text-2xl font-black text-slate-900 mt-1" id="kpiTotalProjects">51</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Assigned to Pods</p>
+          <p class="text-2xl font-black text-blue-600 mt-1" id="kpiAssignedPods">0</p>
+          <p class="text-[11px] text-slate-400 mt-0.5" id="kpiPendingPods">51 pending assignment</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Projected Weekly Hours</p>
+          <p class="text-2xl font-black text-emerald-600 mt-1" id="kpiWeeklyHours">0 hrs</p>
+        </div>
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Projected Weekly Burn</p>
+          <p class="text-2xl font-black text-[#0b2545] mt-1" id="kpiWeeklyBurn">$0</p>
+        </div>
+      </div>
+
+      <!-- 3 Summary Breakdown Tables -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        
+        <!-- Executive Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
+            <span>Executive Oversight</span>
+            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">Principals</span>
+          </div>
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-2.5 px-3">Executive</th>
+                <th class="py-2.5 px-3 text-right">Projects</th>
+                <th class="py-2.5 px-3 text-right">% Share</th>
+              </tr>
+            </thead>
+            <tbody id="summaryExecBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+
+        <!-- Project Manager Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
+            <span>Project Manager Workload</span>
+            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">PM Tier</span>
+          </div>
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-2.5 px-3">PM</th>
+                <th class="py-2.5 px-3 text-right">Projects</th>
+                <th class="py-2.5 px-3 text-right">% Share</th>
+              </tr>
+            </thead>
+            <tbody id="summaryPmBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+
+        <!-- Delivery Pod Table -->
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
+            <span>Delivery Pod Assignments</span>
+            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">Pods 1–8</span>
+          </div>
+          <table class="w-full text-xs text-left">
+            <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
+              <tr>
+                <th class="py-2.5 px-3">Pod</th>
+                <th class="py-2.5 px-3 text-right">Projects</th>
+                <th class="py-2.5 px-3 text-right">% Share</th>
+              </tr>
+            </thead>
+            <tbody id="summaryPodBody" class="divide-y divide-slate-100"></tbody>
+          </table>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 4: WEEKLY WORKLOAD PROJECTIONS -->
+    <!-- ========================================== -->
+    <div id="tab-workload" class="tab-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Weekly Workload Allocation Matrix</h2>
+          <p class="text-xs text-slate-500">Assign projected weekly hours for each Senior Staff and Staff Engineer by project.</p>
+        </div>
+        <div class="text-xs text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
+          💡 Staff hours are tied directly to the assigned Pod members.
+        </div>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto max-h-[680px]">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-200 z-10">
+              <tr>
+                <th class="py-3 px-3.5">#</th>
+                <th class="py-3 px-3.5 min-w-[200px]">Project Name</th>
+                <th class="py-3 px-3.5">Assigned Pod</th>
+                <th class="py-3 px-3.5 min-w-[150px]">Senior Staff</th>
+                <th class="py-3 px-3.5 w-28 text-center">Sr. Hours (h)</th>
+                <th class="py-3 px-3.5 min-w-[150px]">Staff Engineer</th>
+                <th class="py-3 px-3.5 w-28 text-center">Staff Hours (h)</th>
+                <th class="py-3 px-3.5 text-right">Total Hours</th>
+              </tr>
+            </thead>
+            <tbody id="workloadTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+            <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sticky bottom-0 z-10">
+              <tr>
+                <td colspan="4" class="py-3 px-3.5 text-right text-slate-700">Total Weekly Department Hours:</td>
+                <td class="py-3 px-3.5 text-center text-blue-700" id="totalSrHours">0 h</td>
+                <td></td>
+                <td class="py-3 px-3.5 text-center text-blue-700" id="totalStaffHours">0 h</td>
+                <td class="py-3 px-3.5 text-right text-emerald-700 font-black text-sm" id="grandTotalHours">0 h</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- TAB 5: WEEKLY PROJECTED BURN REPORT -->
+    <!-- ========================================== -->
+    <div id="tab-burn" class="tab-content hidden space-y-4">
+      <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div>
+          <h2 class="text-base font-bold text-slate-900">Weekly Projected Burn Financial Report</h2>
+          <p class="text-xs text-slate-500">Calculated in real-time from assigned weekly hours & individual staff billing rates.</p>
+        </div>
+        <button onclick="window.print()" class="px-3.5 py-1.5 text-xs font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg flex items-center gap-1.5 transition border border-slate-300">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i> Print / Save PDF
+        </button>
+      </div>
+
+      <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="overflow-x-auto max-h-[680px]">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-200 z-10">
+              <tr>
+                <th class="py-3 px-3.5">#</th>
+                <th class="py-3 px-3.5 min-w-[200px]">Project Name</th>
+                <th class="py-3 px-3.5">PM</th>
+                <th class="py-3 px-3.5">Pod</th>
+                <th class="py-3 px-3.5 text-right">Senior Burn ($)</th>
+                <th class="py-3 px-3.5 text-right">Staff Burn ($)</th>
+                <th class="py-3 px-3.5 text-right font-black text-slate-900">Total Weekly Burn ($)</th>
+              </tr>
+            </thead>
+            <tbody id="burnTableBody" class="divide-y divide-slate-100">
+              <!-- Rendered via JS -->
+            </tbody>
+            <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sticky bottom-0 z-10">
+              <tr>
+                <td colspan="4" class="py-3 px-3.5 text-right text-slate-700">Total Department Projected Weekly Burn:</td>
+                <td class="py-3 px-3.5 text-right text-blue-700" id="totalSrBurn">$0</td>
+                <td class="py-3 px-3.5 text-right text-blue-700" id="totalStaffBurn">$0</td>
+                <td class="py-3 px-3.5 text-right text-emerald-700 font-black text-sm" id="grandTotalBurn">$0</td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ========================================== -->
+  <!-- MODAL: ADD NEW PROJECT                     -->
+  <!-- ========================================== -->
+  <div id="addProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <div class="bg-[#0b2545] text-white px-5 py-4 flex justify-between items-center">
+        <h3 class="font-bold text-sm">Add New Project</h3>
+        <button onclick="closeModal('addProjectModal')" class="text-slate-400 hover:text-white">&times;</button>
+      </div>
+      <form id="newProjectForm" onsubmit="handleCreateProject(event)" class="p-5 space-y-4 text-xs">
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Project Name *</label>
+          <input type="text" id="modalProjectName" required placeholder="e.g. Cambridge Life Sciences Campus" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Executive Oversight *</label>
+          <select id="modalExecutive" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+            <option value="Frank Holmes">Frank Holmes</option>
+            <option value="John Perry">John Perry</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Project Manager *</label>
+          <select id="modalPM" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+            <option value="Robert Phillips">Robert Phillips</option>
+            <option value="Maggie Laracy">Maggie Laracy</option>
+            <option value="Hannah Schur">Hannah Schur</option>
+            <option value="Coleman Horsley">Coleman Horsley</option>
+            <option value="Frank Holmes">Frank Holmes</option>
+            <option value="John Perry">John Perry</option>
+          </select>
+        </div>
+        <div>
+          <label class="block font-semibold text-slate-700 mb-1">Assigned Delivery Pod (Optional)</label>
+          <select id="modalPod" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+            <option value="">-- Unassigned --</option>
+            <option value="Pod Cobalt">Pod Cobalt</option>
+            <option value="Pod Slate">Pod Slate</option>
+            <option value="Pod Navy">Pod Navy</option>
+            <option value="Pod Steel">Pod Steel</option>
+            <option value="Pod Granite">Pod Granite</option>
+            <option value="Pod Indigo">Pod Indigo</option>
+            <option value="Pod Teal">Pod Teal</option>
+            <option value="Pod Copper">Pod Copper</option>
+          </select>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+          <button type="button" onclick="closeModal('addProjectModal')" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">Cancel</button>
+          <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">Save Project</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- APPLICATION LOGIC -->
+  <script>
+    // --- 0. SECURITY & AUTHENTICATION ---
+    const APP_PASSCODE = "LanganBosCivil";
+
+    function checkAuth() {
+      const isAuth = sessionStorage.getItem('bsc_authenticated');
+      const gate = document.getElementById('authGate');
+      if (isAuth === 'true') {
+        gate.classList.add('hidden');
+      } else {
+        gate.classList.remove('hidden');
+        setTimeout(() => {
+          const inp = document.getElementById('passcodeInput');
+          if (inp) inp.focus();
+        }, 100);
+      }
+    }
+
+    function handleAuth(e) {
+      e.preventDefault();
+      const input = document.getElementById('passcodeInput');
+      const err = document.getElementById('authError');
+      if (input.value === APP_PASSCODE) {
+        sessionStorage.setItem('bsc_authenticated', 'true');
+        err.classList.add('hidden');
+        document.getElementById('authGate').classList.add('hidden');
+        renderAll();
+      } else {
+        err.classList.remove('hidden');
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    function lockApp() {
+      sessionStorage.removeItem('bsc_authenticated');
+      document.getElementById('authGate').classList.remove('hidden');
+      document.getElementById('passcodeInput').value = '';
+      document.getElementById('authError').classList.add('hidden');
+      document.getElementById('passcodeInput').focus();
+    }
+
+    function togglePassVisibility() {
+      const inp = document.getElementById('passcodeInput');
+      inp.type = inp.type === 'password' ? 'text' : 'password';
+    }
+
+    // --- 1. INITIAL SEED DATA ---
+    const INITIAL_STAFF = [
+      { id: "fh", name: "Frank Holmes", role: "Principal", tier: "Executive", rate: 430, photo: "" },
+      { id: "jp", name: "John Perry", role: "Associate Principal", tier: "Executive", rate: 430, photo: "" },
+      { id: "rp", name: "Robert Phillips", role: "Senior Project Engineer", tier: "PM", rate: 375, photo: "" },
+      { id: "ml", name: "Maggie Laracy", role: "Senior Project Manager", tier: "PM", rate: 375, photo: "" },
+      { id: "ch", name: "Coleman Horsley", role: "Senior Project Manager", tier: "PM", rate: 375, photo: "" },
+      { id: "hs", name: "Hannah Schur", role: "Project Engineer", tier: "PM", rate: 355, photo: "" },
+      { id: "ms", name: "Madison Servin", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: "" },
+      { id: "ng", name: "Nick Gulas", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: "" },
+      { id: "kl", name: "Katie Laresch", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: "" },
+      { id: "sf", name: "Sarah Flower", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: "" },
+      { id: "mt", name: "Megan Thomas", role: "Senior Staff Engineer", tier: "Senior", rate: 275, photo: "" },
+      { id: "mr", name: "Mario Rodriguez", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
+      { id: "sw", name: "Sara Walsh", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
+      { id: "om", name: "Olivia Munn", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
+      { id: "ca", name: "Christian Allora", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
+      { id: "mz", name: "Matthew Zannini", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
+      { id: "jm", name: "Jennifer Motsko", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
+      { id: "mg", name: "Megan Gutierrez", role: "Staff Engineer", tier: "Staff", rate: 230, photo: "" }
+    ];
+
+    const INITIAL_PODS = [
+      { id: "Pod Cobalt", name: "Pod Cobalt", color: "#2563eb", lead: "Robert Phillips", senior: "Katie Laresch", staff: "Christian Allora" },
+      { id: "Pod Slate", name: "Pod Slate", color: "#475569", lead: "Robert Phillips", senior: "Madison Servin", staff: "Sara Walsh" },
+      { id: "Pod Navy", name: "Pod Navy", color: "#1e3a8a", lead: "Robert Phillips", senior: "Nick Gulas", staff: "Matthew Zannini" },
+      { id: "Pod Steel", name: "Pod Steel", color: "#0284c7", lead: "Maggie Laracy", senior: "Madison Servin", staff: "Olivia Munn" },
+      { id: "Pod Granite", name: "Pod Granite", color: "#334155", lead: "Maggie Laracy", senior: "Katie Laresch", staff: "Megan Thomas" },
+      { id: "Pod Indigo", name: "Pod Indigo", color: "#4f46e5", lead: "Hannah Schur", senior: "Sarah Flower", staff: "Megan Gutierrez" },
+      { id: "Pod Teal", name: "Pod Teal", color: "#0d9488", lead: "Hannah Schur", senior: "Sarah Flower", staff: "Jennifer Motsko" },
+      { id: "Pod Copper", name: "Pod Copper", color: "#b45309", lead: "Coleman Horsley", senior: "Megan Thomas", staff: "Mario Rodriguez" }
+    ];
+
+    const INITIAL_PROJECTS = [
+      { id: 1, name: "Hudson", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 2, name: "Natick Senior Housing", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 3, name: "Plumley", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 4, name: "Bedford Shopping Center", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 5, name: "EPE Tewksbury", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 6, name: "Heading Home", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
+      { id: 7, name: "Andover H.S.", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 8, name: "Medway Public Safety Complex", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 9, name: "Rhynland Tyngsborough BESS", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 10, name: "Brandeis ADA", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 11, name: "Amazon Douglas", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 12, name: "Centech UPS", executive: "John Perry", pm: "John Perry", pod: "" },
+      { id: 13, name: "Faneuil Gardens", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "" },
+      { id: 14, name: "Trinity Lowell", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "" },
+      { id: 15, name: "DHOS Braintree", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 16, name: "DHOS Peabody", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 17, name: "Fallbrook Elementary", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 18, name: "AMAT Building 4", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 19, name: "St. Gobain", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 20, name: "AMAT Logistics", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 21, name: "AMAT Logistics Early Enablement", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 22, name: "McDonalds Plainville", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 23, name: "Raynham PSF", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 24, name: "Terrain- Wayland", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 25, name: "McDonalds Salem", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 26, name: "Jumbo Capital - 888 Worcester Street", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 27, name: "McDonalds- Nashua/Billerica", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
+      { id: 28, name: "Centech Battery Storage", executive: "John Perry", pm: "Hannah Schur", pod: "" },
+      { id: 29, name: "Speen Street, Natick", executive: "John Perry", pm: "Hannah Schur", pod: "" },
+      { id: 30, name: "Cambridge Residence", executive: "John Perry", pm: "Hannah Schur", pod: "" },
+      { id: 31, name: "Fessenden Dining Hall", executive: "John Perry", pm: "Hannah Schur", pod: "" },
+      { id: 32, name: "AbbVie", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 33, name: "Brockton Yards", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 34, name: "Premier Trailers", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 35, name: "BHS Dining Hall", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 36, name: "Sea Breeze BESS, Bourne", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 37, name: "300 Wellesley Street", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 38, name: "Eversource - Yarmouth", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 39, name: "CHR HV West", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 40, name: "Worcester Housing Authority", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 41, name: "Quonset", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 42, name: "NPS Wellfleet Septic", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 43, name: "241 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 44, name: "240 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 45, name: "Melrose Police", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 46, name: "Melrose Engine 2", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 47, name: "Carvana, Acton", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 48, name: "Melrose Engine 3", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 49, name: "Melrose Central HQ", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 50, name: "Brixmor Lynn", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
+      { id: 51, name: "Citi Field, Hardrock Civil + Geotech Support", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" }
+    ];
+
+    // --- 2. STATE MANAGEMENT ---
+    let appData = {
+      staff: JSON.parse(localStorage.getItem('bsc_staff')) || INITIAL_STAFF,
+      pods: JSON.parse(localStorage.getItem('bsc_pods')) || INITIAL_PODS,
+      projects: JSON.parse(localStorage.getItem('bsc_projects')) || INITIAL_PROJECTS,
+      workload: JSON.parse(localStorage.getItem('bsc_workload')) || {}
+    };
+
+    function saveData() {
+      localStorage.setItem('bsc_staff', JSON.stringify(appData.staff));
+      localStorage.setItem('bsc_pods', JSON.stringify(appData.pods));
+      localStorage.setItem('bsc_projects', JSON.stringify(appData.projects));
+      localStorage.setItem('bsc_workload', JSON.stringify(appData.workload));
+      renderAll();
+    }
+
+    function resetDataPrompt() {
+      if (confirm("Reset all project allocations, hours, and rates to original default state?")) {
+        localStorage.clear();
+        appData.staff = INITIAL_STAFF;
+        appData.pods = INITIAL_PODS;
+        appData.projects = INITIAL_PROJECTS;
+        appData.workload = {};
+        saveData();
+      }
+    }
+
+    // --- 3. TAB NAVIGATION ---
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-blue-400', 'text-white');
+        btn.classList.add('border-transparent', 'text-slate-300');
+      });
+      document.getElementById(tabId).classList.remove('hidden');
+      const activeBtn = document.getElementById('nav-' + tabId);
+      activeBtn.classList.remove('border-transparent', 'text-slate-300');
+      activeBtn.classList.add('border-blue-400', 'text-white');
+      renderAll();
+    }
+
+    // --- 4. RENDERERS ---
+
+    // TAB 1: PROJECTS TABLE
+    function renderProjectsTable() {
+      const tbody = document.getElementById('projectsTableBody');
+      const search = document.getElementById('projectSearch').value.toLowerCase();
+      const filtered = appData.projects.filter(p => p.name.toLowerCase().includes(search));
+
+      const execOptions = ["Frank Holmes", "John Perry"];
+      const pmOptions = ["Robert Phillips", "Maggie Laracy", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry"];
+      const podOptions = appData.pods.map(p => p.name);
+
+      tbody.innerHTML = filtered.map((p, idx) => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-2.5 px-4 text-slate-400 font-mono">${idx + 1}</td>
+          <td class="py-2.5 px-4 font-semibold text-slate-900">${p.name}</td>
+          <td class="py-2.5 px-4">
+            <select onchange="updateProjectField(${p.id}, 'executive', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+              ${execOptions.map(ex => `<option value="${ex}" ${p.executive === ex ? 'selected' : ''}>${ex}</option>`).join('')}
+            </select>
+          </td>
+          <td class="py-2.5 px-4">
+            <select onchange="updateProjectField(${p.id}, 'pm', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+              ${pmOptions.map(pm => `<option value="${pm}" ${p.pm === pm ? 'selected' : ''}>${pm}</option>`).join('')}
+            </select>
+          </td>
+          <td class="py-2.5 px-4">
+            <select onchange="updateProjectField(${p.id}, 'pod', this.value)" class="bg-white border ${p.pod ? 'border-blue-400 font-medium text-blue-900 bg-blue-50/50' : 'border-slate-300 text-slate-500'} rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+              <option value="">-- Assign Pod --</option>
+              ${podOptions.map(pod => `<option value="${pod}" ${p.pod === pod ? 'selected' : ''}>${pod}</option>`).join('')}
+            </select>
+          </td>
+          <td class="py-2.5 px-4 text-center">
+            <button onclick="deleteProject(${p.id})" title="Delete project" class="text-slate-400 hover:text-red-600 transition p-1">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            </button>
+          </td>
+        </tr>
+      `).join('');
+      lucide.createIcons();
+    }
+
+    function updateProjectField(id, field, value) {
+      const p = appData.projects.find(item => item.id === id);
+      if (p) {
+        p[field] = value;
+        saveData();
+      }
+    }
+
+    function deleteProject(id) {
+      if (confirm("Delete this project from portfolio?")) {
+        appData.projects = appData.projects.filter(p => p.id !== id);
+        delete appData.workload[id];
+        saveData();
+      }
+    }
+
+    function handleCreateProject(e) {
+      e.preventDefault();
+      const name = document.getElementById('modalProjectName').value.trim();
+      const executive = document.getElementById('modalExecutive').value;
+      const pm = document.getElementById('modalPM').value;
+      const pod = document.getElementById('modalPod').value;
+
+      if (!name) return;
+      const newId = Date.now();
+      appData.projects.unshift({ id: newId, name, executive, pm, pod });
+      saveData();
+      closeModal('addProjectModal');
+      document.getElementById('newProjectForm').reset();
+    }
+
+    // TAB 2: PODS & STAFF DIRECTORY
+    function renderPodsGrid() {
+      const container = document.getElementById('podsGrid');
+      const pmList = appData.staff.filter(s => s.tier === 'PM' || s.tier === 'Executive');
+      const seniorList = appData.staff.filter(s => s.tier === 'Senior');
+      const staffList = appData.staff.filter(s => s.tier === 'Staff');
+
+      container.innerHTML = appData.pods.map(pod => `
+        <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between" style="border-top: 4px solid ${pod.color}">
+          <div class="p-3.5 space-y-3">
+            <div class="flex justify-between items-center">
+              <h3 class="font-bold text-slate-900 text-sm">${pod.name}</h3>
+              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${pod.color}"></span>
+            </div>
+
+            <div>
+              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Pod Lead (PM/PE)</label>
+              <select onchange="updatePodMember('${pod.name}', 'lead', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
+                ${pmList.map(s => `<option value="${s.name}" ${pod.lead === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Senior Technical Staff</label>
+              <select onchange="updatePodMember('${pod.name}', 'senior', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
+                ${seniorList.map(s => `<option value="${s.name}" ${pod.senior === s.name ? 'selected' : ''}>${s.name} ($${s.rate})</option>`).join('')}
+              </select>
+            </div>
+
+            <div>
+              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Staff Engineer</label>
+              <select onchange="updatePodMember('${pod.name}', 'staff', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
+                ${staffList.map(s => `<option value="${s.name}" ${pod.staff === s.name ? 'selected' : ''}>${s.name} ($${s.rate})</option>`).join('')}
+              </select>
+            </div>
+          </div>
+          <div class="bg-slate-50 px-3.5 py-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
+            <span>Assigned Projects:</span>
+            <span class="font-bold text-blue-700">${appData.projects.filter(p => p.pod === pod.name).length}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function updatePodMember(podName, role, personName) {
+      const pod = appData.pods.find(p => p.name === podName);
+      if (pod) {
+        pod[role] = personName;
+        saveData();
+      }
+    }
+
+    function renderStaffDirectory() {
+      const container = document.getElementById('staffDirectoryGrid');
+      container.innerHTML = appData.staff.map(person => {
+        const initials = person.name.split(' ').map(n => n[0]).join('');
+        return `
+          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+            <div class="relative group cursor-pointer" onclick="triggerPhotoUpload('${person.id}')">
+              ${person.photo ? 
+                `<img src="${person.photo}" class="w-12 h-12 rounded-full object-cover border border-slate-300" />` : 
+                `<div class="w-12 h-12 rounded-full bg-[#0b2545] text-white flex items-center justify-center font-bold text-sm tracking-wider shadow-inner">${initials}</div>`
+              }
+              <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-[9px] font-bold">Photo</div>
+              <input type="file" id="file-${person.id}" accept="image/*" class="hidden" onchange="handlePhotoUpload('${person.id}', this)" />
+            </div>
+
+            <div class="flex-grow min-w-0">
+              <h4 class="font-bold text-xs text-slate-900 truncate">${person.name}</h4>
+              <p class="text-[11px] text-slate-500 truncate">${person.role}</p>
+              <div class="mt-1 flex items-center gap-1">
+                <span class="text-[11px] font-bold text-slate-400">$</span>
+                <input type="number" value="${person.rate}" onchange="updateStaffRate('${person.id}', this.value)" class="w-16 px-1.5 py-0.5 border border-slate-300 rounded text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+                <span class="text-[10px] text-slate-400">/hr</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function triggerPhotoUpload(id) {
+      document.getElementById('file-' + id).click();
+    }
+
+    function handlePhotoUpload(id, input) {
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const person = appData.staff.find(s => s.id === id);
+          if (person) {
+            person.photo = e.target.result;
+            saveData();
+          }
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function updateStaffRate(id, rate) {
+      const person = appData.staff.find(s => s.id === id);
+      if (person) {
+        person.rate = parseFloat(rate) || 0;
+        saveData();
+      }
+    }
+
+    // TAB 3: SUMMARY DASHBOARD
+    function renderSummaryDashboard() {
+      const totalProjs = appData.projects.length;
+      const assignedPodsCount = appData.projects.filter(p => !!p.pod).length;
+      const pendingPodsCount = totalProjs - assignedPodsCount;
+
+      let totalWeeklyHrs = 0;
+      let totalWeeklyCost = 0;
+
+      appData.projects.forEach(p => {
+        const pod = appData.pods.find(pd => pd.name === p.pod);
+        const w = appData.workload[p.id] || { srHours: 0, staffHours: 0 };
+        const srHrs = parseFloat(w.srHours) || 0;
+        const staffHrs = parseFloat(w.staffHours) || 0;
+        totalWeeklyHrs += (srHrs + staffHrs);
+
+        if (pod) {
+          const srObj = appData.staff.find(s => s.name === pod.senior);
+          const stObj = appData.staff.find(s => s.name === pod.staff);
+          const srRate = srObj ? srObj.rate : 0;
+          const stRate = stObj ? stObj.rate : 0;
+          totalWeeklyCost += (srHrs * srRate) + (staffHrs * stRate);
+        }
+      });
+
+      document.getElementById('kpiTotalProjects').innerText = totalProjs;
+      document.getElementById('kpiAssignedPods').innerText = assignedPodsCount;
+      document.getElementById('kpiPendingPods').innerText = `${pendingPodsCount} unassigned`;
+      document.getElementById('kpiWeeklyHours').innerText = `${totalWeeklyHrs.toFixed(1)} hrs`;
+      document.getElementById('kpiWeeklyBurn').innerText = `$${Math.round(totalWeeklyCost).toLocaleString()}`;
+
+      // Executive Breakdown
+      const execs = ["Frank Holmes", "John Perry"];
+      const execTbody = document.getElementById('summaryExecBody');
+      execTbody.innerHTML = execs.map(ex => {
+        const count = appData.projects.filter(p => p.executive === ex).length;
+        const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 px-3 font-semibold text-slate-800">${ex}</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900">${count}</td>
+            <td class="py-2 px-3 text-right text-slate-500">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      // PM Breakdown
+      const pms = ["Robert Phillips", "Maggie Laracy", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry"];
+      const pmTbody = document.getElementById('summaryPmBody');
+      pmTbody.innerHTML = pms.map(pm => {
+        const count = appData.projects.filter(p => p.pm === pm).length;
+        const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 px-3 font-semibold text-slate-800">${pm}</td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900">${count}</td>
+            <td class="py-2 px-3 text-right text-slate-500">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+
+      // Pod Breakdown
+      const podTbody = document.getElementById('summaryPodBody');
+      podTbody.innerHTML = appData.pods.map(pod => {
+        const count = appData.projects.filter(p => p.pod === pod.name).length;
+        const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2 px-3 font-semibold text-slate-800 flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full" style="background-color: ${pod.color}"></span>
+              ${pod.name}
+            </td>
+            <td class="py-2 px-3 text-right font-mono font-bold text-slate-900">${count}</td>
+            <td class="py-2 px-3 text-right text-slate-500">${pct}%</td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // TAB 4: WORKLOAD MATRIX
+    function renderWorkloadTable() {
+      const tbody = document.getElementById('workloadTableBody');
+      let grandSrHrs = 0;
+      let grandStaffHrs = 0;
+
+      tbody.innerHTML = appData.projects.map((p, idx) => {
+        const pod = appData.pods.find(pd => pd.name === p.pod);
+        const w = appData.workload[p.id] || { srHours: 0, staffHours: 0 };
+        const srHrs = parseFloat(w.srHours) || 0;
+        const stHrs = parseFloat(w.staffHours) || 0;
+        const rowTotal = srHrs + stHrs;
+
+        grandSrHrs += srHrs;
+        grandStaffHrs += stHrs;
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3.5 text-slate-400 font-mono">${idx + 1}</td>
+            <td class="py-2.5 px-3.5 font-semibold text-slate-900">${p.name}</td>
+            <td class="py-2.5 px-3.5">
+              ${pod ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-white" style="background-color: ${pod.color}">${pod.name}</span>` : `<span class="text-slate-400 italic">None</span>`}
+            </td>
+            <td class="py-2.5 px-3.5 text-slate-700">${pod ? pod.senior : '—'}</td>
+            <td class="py-2.5 px-3.5 text-center">
+              <input type="number" min="0" step="0.5" value="${w.srHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'srHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!pod ? 'disabled' : ''} />
+            </td>
+            <td class="py-2.5 px-3.5 text-slate-700">${pod ? pod.staff : '—'}</td>
+            <td class="py-2.5 px-3.5 text-center">
+              <input type="number" min="0" step="0.5" value="${w.staffHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'staffHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!pod ? 'disabled' : ''} />
+            </td>
+            <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">${rowTotal.toFixed(1)} h</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('totalSrHours').innerText = `${grandSrHrs.toFixed(1)} h`;
+      document.getElementById('totalStaffHours').innerText = `${grandStaffHrs.toFixed(1)} h`;
+      document.getElementById('grandTotalHours').innerText = `${(grandSrHrs + grandStaffHrs).toFixed(1)} h`;
+    }
+
+    function updateProjectHours(projId, key, val) {
+      if (!appData.workload[projId]) {
+        appData.workload[projId] = { srHours: 0, staffHours: 0 };
+      }
+      appData.workload[projId][key] = parseFloat(val) || 0;
+      saveData();
+    }
+
+    // TAB 5: BURN REPORT
+    function renderBurnTable() {
+      const tbody = document.getElementById('burnTableBody');
+      let grandSrBurn = 0;
+      let grandStaffBurn = 0;
+
+      tbody.innerHTML = appData.projects.map((p, idx) => {
+        const pod = appData.pods.find(pd => pd.name === p.pod);
+        const w = appData.workload[p.id] || { srHours: 0, staffHours: 0 };
+        const srHrs = parseFloat(w.srHours) || 0;
+        const stHrs = parseFloat(w.staffHours) || 0;
+
+        let srRate = 0;
+        let stRate = 0;
+        if (pod) {
+          const srObj = appData.staff.find(s => s.name === pod.senior);
+          const stObj = appData.staff.find(s => s.name === pod.staff);
+          if (srObj) srRate = srObj.rate;
+          if (stObj) stRate = stObj.rate;
+        }
+
+        const srCost = srHrs * srRate;
+        const stCost = stHrs * stRate;
+        const totalBurn = srCost + stCost;
+
+        grandSrBurn += srCost;
+        grandStaffBurn += stCost;
+
+        return `
+          <tr class="hover:bg-slate-50">
+            <td class="py-2.5 px-3.5 text-slate-400 font-mono">${idx + 1}</td>
+            <td class="py-2.5 px-3.5 font-semibold text-slate-900">${p.name}</td>
+            <td class="py-2.5 px-3.5 text-slate-700">${p.pm}</td>
+            <td class="py-2.5 px-3.5">${p.pod || '<span class="text-slate-400 italic">None</span>'}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(srCost).toLocaleString()}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(stCost).toLocaleString()}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono font-bold text-emerald-700">$${Math.round(totalBurn).toLocaleString()}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('totalSrBurn').innerText = `$${Math.round(grandSrBurn).toLocaleString()}`;
+      document.getElementById('totalStaffBurn').innerText = `$${Math.round(grandStaffBurn).toLocaleString()}`;
+      document.getElementById('grandTotalBurn').innerText = `$${Math.round(grandSrBurn + grandStaffBurn).toLocaleString()}`;
+    }
+
+    // --- 5. EXPORT / BACKUP ---
+    function exportJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", "Boston_Site_Civil_Operations_Backup.json");
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // --- 6. MODAL HELPERS ---
+    function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    // --- 7. INITIALIZE APP ---
+    function renderAll() {
+      renderProjectsTable();
+      renderPodsGrid();
+      renderStaffDirectory();
+      renderSummaryDashboard();
+      renderWorkloadTable();
+      renderBurnTable();
+      lucide.createIcons();
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkAuth();
+      renderAll();
+    });
+  </script>
+</body>
+</html>
