@@ -9,11 +9,12 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    /* Custom Scrollbars */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: #f1f5f9; }
     ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
     ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+    .project-row:hover { background-color: #f8fafc; }
+    .drawer-transition { transition: all 0.2s ease-in-out; }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 antialiased min-h-screen flex flex-col font-sans select-none">
@@ -23,7 +24,6 @@
   <!-- ========================================== -->
   <div id="authGate" class="fixed inset-0 z-50 bg-[#07172b] flex items-center justify-center p-4">
     <div class="max-w-md w-full bg-[#0b2545] border border-slate-700/60 rounded-2xl shadow-2xl p-8 text-center text-white relative overflow-hidden">
-      <!-- Top Accent Bar -->
       <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-400"></div>
       
       <div class="w-14 h-14 bg-blue-600/20 text-blue-400 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-500/30">
@@ -58,7 +58,7 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- TOP APP HEADER                             -->
+  <!-- TOP APP HEADER & NAVIGATION                -->
   <!-- ========================================== -->
   <header class="bg-[#0b2545] text-white shadow-md sticky top-0 z-40">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center h-16">
@@ -87,13 +87,13 @@
       </div>
     </div>
 
-    <!-- NAVIGATION TABS -->
+    <!-- Navigation Tabs -->
     <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-1 border-t border-slate-700/60 overflow-x-auto">
       <button onclick="switchTab('tab-projects')" id="nav-tab-projects" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-blue-400 text-white flex items-center gap-2 transition">
         <i data-lucide="folder-kanban" class="w-4 h-4"></i> Tab 1: Project Hub
       </button>
       <button onclick="switchTab('tab-pods')" id="nav-tab-pods" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
-        <i data-lucide="users" class="w-4 h-4"></i> Tab 2: Pods & Staff Studio
+        <i data-lucide="sitemap" class="w-4 h-4"></i> Tab 2: Hierarchy & Staff Studio
       </button>
       <button onclick="switchTab('tab-summary')" id="nav-tab-summary" class="tab-btn px-4 py-3 text-xs font-semibold uppercase tracking-wider border-b-2 border-transparent text-slate-300 hover:text-white flex items-center gap-2 transition">
         <i data-lucide="bar-chart-3" class="w-4 h-4"></i> Tab 3: Summary Dashboard
@@ -111,32 +111,33 @@
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full">
 
     <!-- ========================================== -->
-    <!-- TAB 1: PROJECTS HUB -->
+    <!-- TAB 1: PROJECTS HUB (COLLAPSIBLE ROWS)     -->
     <!-- ========================================== -->
     <div id="tab-projects" class="tab-content space-y-4">
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 class="text-base font-bold text-slate-900">Active Project Directory</h2>
-          <p class="text-xs text-slate-500">Configure Executive oversight, Project Manager assignment, and Pod allocation.</p>
+          <p class="text-xs text-slate-500">Click any project to expand and review its condensed Tier 1, Tier 2, and Tier 3 assignment cards.</p>
         </div>
         <div class="flex items-center gap-3">
           <input type="text" id="projectSearch" oninput="renderProjectsTable()" placeholder="Search project name..." class="px-3 py-2 text-xs border border-slate-300 rounded-lg w-56 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <button onclick="openModal('addProjectModal')" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm transition">
+          <button onclick="openAddProjectModal()" class="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center gap-1.5 shadow-sm transition">
             <i data-lucide="plus-circle" class="w-4 h-4"></i> ADD NEW PROJECT
           </button>
         </div>
       </div>
 
       <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-        <div class="overflow-x-auto max-h-[680px]">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-200">
+        <div class="overflow-x-auto max-h-[720px]">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead class="bg-slate-50 text-slate-600 font-semibold uppercase tracking-wider sticky top-0 border-b border-slate-200 z-10">
               <tr>
-                <th class="py-3 px-4">#</th>
-                <th class="py-3 px-4">Project Name</th>
-                <th class="py-3 px-4">Executive Oversight</th>
-                <th class="py-3 px-4">Project Manager</th>
-                <th class="py-3 px-4">Assigned Delivery Pod</th>
+                <th class="py-3 px-3 w-10 text-center"></th>
+                <th class="py-3 px-3 w-12 text-slate-400 font-mono">#</th>
+                <th class="py-3 px-4 min-w-[220px]">Project Name</th>
+                <th class="py-3 px-4">Tier 1: Principal</th>
+                <th class="py-3 px-4">Tier 2: Project Leader</th>
+                <th class="py-3 px-4">Tier 3: Pod / Staffing</th>
                 <th class="py-3 px-4 text-center">Actions</th>
               </tr>
             </thead>
@@ -149,48 +150,60 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 2: PODS & STAFF CONFIGURATION -->
+    <!-- TAB 2: HIERARCHY & PODS STUDIO             -->
     <!-- ========================================== -->
     <div id="tab-pods" class="tab-content hidden space-y-6">
       
-      <!-- Delivery Pods Section -->
+      <!-- Tier 1 & 2 Visual Summary Banner -->
+      <div class="bg-[#0b2545] p-5 rounded-2xl text-white shadow-sm space-y-4">
+        <div class="text-center">
+          <span class="text-[10px] tracking-widest font-black uppercase text-blue-400 bg-blue-950/80 px-2.5 py-1 rounded border border-blue-800/60 inline-block mb-1">PROTOTYPICAL PROJECT DELIVERY PODS</span>
+          <h2 class="text-lg font-bold">OPERATIONAL RESOURCE HIERARCHY</h2>
+        </div>
+
+        <!-- Tier 1 Principals -->
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-blue-300 text-center mb-2">Tier 1: Executive Oversight</p>
+          <div class="flex justify-center gap-4 flex-wrap" id="hierarchyTier1"></div>
+        </div>
+
+        <!-- Tier 2 Project Leaders -->
+        <div>
+          <p class="text-[10px] font-black uppercase tracking-widest text-emerald-300 text-center mb-2">Tier 2: Project Leaders</p>
+          <div class="flex justify-center gap-3 flex-wrap" id="hierarchyTier2"></div>
+        </div>
+      </div>
+
+      <!-- Tier 3 Pods Grid -->
       <div>
         <div class="flex justify-between items-center mb-3">
           <div>
-            <h2 class="text-base font-bold text-slate-900">Delivery Pod Formations (8 Pods)</h2>
-            <p class="text-xs text-slate-500">Modify Pod leads, senior staff, and staff engineers dynamically.</p>
+            <h3 class="text-base font-bold text-slate-900">Tier 3: 2-Person Delivery Pods (8 Pods)</h3>
+            <p class="text-xs text-slate-500">Pods configured with delivery pairs. Any pod can be dynamically mapped to any project leader.</p>
           </div>
         </div>
-
-        <div id="podsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <!-- Rendered via JS -->
-        </div>
+        <div id="podsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"></div>
       </div>
 
       <hr class="border-slate-200" />
 
-      <!-- Personnel Directory & Billing Rates -->
+      <!-- Personnel Directory (19 Staff) -->
       <div class="space-y-3">
         <div class="flex justify-between items-center">
           <div>
-            <h2 class="text-base font-bold text-slate-900">Personnel Directory & Rate Cards (18 Staff)</h2>
-            <p class="text-xs text-slate-500">Upload individual photos and configure hourly billing rates ($/hr).</p>
+            <h3 class="text-base font-bold text-slate-900">Full Staff Roster & Rate Cards (19 Staff)</h3>
+            <p class="text-xs text-slate-500">Includes Liza Kimball ($385/hr) and integrated team headshots.</p>
           </div>
           <span class="text-xs bg-slate-200 text-slate-700 px-2.5 py-1 rounded-full font-medium">Auto-saves to browser</span>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5" id="staffDirectoryGrid">
-          <!-- Rendered via JS -->
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5" id="staffDirectoryGrid"></div>
       </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 3: EXECUTIVE SUMMARY DASHBOARD -->
+    <!-- TAB 3: EXECUTIVE SUMMARY DASHBOARD         -->
     <!-- ========================================== -->
     <div id="tab-summary" class="tab-content hidden space-y-6">
-      
-      <!-- Metric Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
           <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Active Projects</p>
@@ -211,10 +224,7 @@
         </div>
       </div>
 
-      <!-- 3 Summary Breakdown Tables -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        
-        <!-- Executive Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
             <span>Executive Oversight</span>
@@ -223,7 +233,7 @@
           <table class="w-full text-xs text-left">
             <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
-                <th class="py-2.5 px-3">Executive</th>
+                <th class="py-2.5 px-3">Principal</th>
                 <th class="py-2.5 px-3 text-right">Projects</th>
                 <th class="py-2.5 px-3 text-right">% Share</th>
               </tr>
@@ -232,16 +242,15 @@
           </table>
         </div>
 
-        <!-- Project Manager Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
-            <span>Project Manager Workload</span>
-            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">PM Tier</span>
+            <span>Project Leader Workload</span>
+            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">Tier 2</span>
           </div>
           <table class="w-full text-xs text-left">
             <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
               <tr>
-                <th class="py-2.5 px-3">PM</th>
+                <th class="py-2.5 px-3">Leader</th>
                 <th class="py-2.5 px-3 text-right">Projects</th>
                 <th class="py-2.5 px-3 text-right">% Share</th>
               </tr>
@@ -250,11 +259,10 @@
           </table>
         </div>
 
-        <!-- Delivery Pod Table -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
           <div class="bg-[#0b2545] text-white px-4 py-2.5 font-bold text-xs flex justify-between items-center">
             <span>Delivery Pod Assignments</span>
-            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">Pods 1–8</span>
+            <span class="text-[10px] bg-blue-900 px-2 py-0.5 rounded">Tier 3</span>
           </div>
           <table class="w-full text-xs text-left">
             <thead class="bg-slate-50 text-slate-600 font-semibold border-b border-slate-200">
@@ -267,21 +275,17 @@
             <tbody id="summaryPodBody" class="divide-y divide-slate-100"></tbody>
           </table>
         </div>
-
       </div>
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 4: WEEKLY WORKLOAD PROJECTIONS -->
+    <!-- TAB 4: WORKLOAD MATRIX                     -->
     <!-- ========================================== -->
     <div id="tab-workload" class="tab-content hidden space-y-4">
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
           <h2 class="text-base font-bold text-slate-900">Weekly Workload Allocation Matrix</h2>
-          <p class="text-xs text-slate-500">Assign projected weekly hours for each Senior Staff and Staff Engineer by project.</p>
-        </div>
-        <div class="text-xs text-slate-500 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
-          💡 Staff hours are tied directly to the assigned Pod members.
+          <p class="text-xs text-slate-500">Projected weekly hours assigned to pod members or override staff.</p>
         </div>
       </div>
 
@@ -292,17 +296,15 @@
               <tr>
                 <th class="py-3 px-3.5">#</th>
                 <th class="py-3 px-3.5 min-w-[200px]">Project Name</th>
-                <th class="py-3 px-3.5">Assigned Pod</th>
-                <th class="py-3 px-3.5 min-w-[150px]">Senior Staff</th>
-                <th class="py-3 px-3.5 w-28 text-center">Sr. Hours (h)</th>
-                <th class="py-3 px-3.5 min-w-[150px]">Staff Engineer</th>
-                <th class="py-3 px-3.5 w-28 text-center">Staff Hours (h)</th>
+                <th class="py-3 px-3.5">Staffing Mode</th>
+                <th class="py-3 px-3.5 min-w-[150px]">Member 1</th>
+                <th class="py-3 px-3.5 w-28 text-center">Hours (h)</th>
+                <th class="py-3 px-3.5 min-w-[150px]">Member 2</th>
+                <th class="py-3 px-3.5 w-28 text-center">Hours (h)</th>
                 <th class="py-3 px-3.5 text-right">Total Hours</th>
               </tr>
             </thead>
-            <tbody id="workloadTableBody" class="divide-y divide-slate-100">
-              <!-- Rendered via JS -->
-            </tbody>
+            <tbody id="workloadTableBody" class="divide-y divide-slate-100"></tbody>
             <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sticky bottom-0 z-10">
               <tr>
                 <td colspan="4" class="py-3 px-3.5 text-right text-slate-700">Total Weekly Department Hours:</td>
@@ -318,7 +320,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- TAB 5: WEEKLY PROJECTED BURN REPORT -->
+    <!-- TAB 5: BURN REPORT                         -->
     <!-- ========================================== -->
     <div id="tab-burn" class="tab-content hidden space-y-4">
       <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
@@ -338,16 +340,14 @@
               <tr>
                 <th class="py-3 px-3.5">#</th>
                 <th class="py-3 px-3.5 min-w-[200px]">Project Name</th>
-                <th class="py-3 px-3.5">PM</th>
-                <th class="py-3 px-3.5">Pod</th>
-                <th class="py-3 px-3.5 text-right">Senior Burn ($)</th>
-                <th class="py-3 px-3.5 text-right">Staff Burn ($)</th>
+                <th class="py-3 px-3.5">Tier 2 Leader</th>
+                <th class="py-3 px-3.5">Staffing Tier</th>
+                <th class="py-3 px-3.5 text-right">Member 1 Burn ($)</th>
+                <th class="py-3 px-3.5 text-right">Member 2 Burn ($)</th>
                 <th class="py-3 px-3.5 text-right font-black text-slate-900">Total Weekly Burn ($)</th>
               </tr>
             </thead>
-            <tbody id="burnTableBody" class="divide-y divide-slate-100">
-              <!-- Rendered via JS -->
-            </tbody>
+            <tbody id="burnTableBody" class="divide-y divide-slate-100"></tbody>
             <tfoot class="bg-slate-50 font-bold border-t border-slate-200 sticky bottom-0 z-10">
               <tr>
                 <td colspan="4" class="py-3 px-3.5 text-right text-slate-700">Total Department Projected Weekly Burn:</td>
@@ -364,62 +364,99 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- MODAL: ADD NEW PROJECT                     -->
+  <!-- MODAL: ADD / CONFIGURE PROJECT             -->
   <!-- ========================================== -->
-  <div id="addProjectModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
-    <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
-      <div class="bg-[#0b2545] text-white px-5 py-4 flex justify-between items-center">
-        <h3 class="font-bold text-sm">Add New Project</h3>
-        <button onclick="closeModal('addProjectModal')" class="text-slate-400 hover:text-white">&times;</button>
+  <div id="addProjectModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+    <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-slate-200 animate-in fade-in zoom-in duration-150">
+      <div class="bg-[#0b2545] text-white px-6 py-4 flex justify-between items-center">
+        <div>
+          <h3 class="font-bold text-sm tracking-wide">Add New Project Assignment</h3>
+          <p class="text-[11px] text-slate-300">Set Tier 1, 2, and 3 assignments, or use Custom Override staffing.</p>
+        </div>
+        <button onclick="closeModal('addProjectModal')" class="text-slate-400 hover:text-white text-lg">&times;</button>
       </div>
-      <form id="newProjectForm" onsubmit="handleCreateProject(event)" class="p-5 space-y-4 text-xs">
+
+      <form id="newProjectForm" onsubmit="handleCreateProject(event)" class="p-6 space-y-4 text-xs">
         <div>
-          <label class="block font-semibold text-slate-700 mb-1">Project Name *</label>
-          <input type="text" id="modalProjectName" required placeholder="e.g. Cambridge Life Sciences Campus" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none" />
+          <label class="block font-bold text-slate-700 mb-1 uppercase tracking-wider text-[11px]">Project Name *</label>
+          <input type="text" id="modalProjectName" required placeholder="e.g. Cambridge Life Sciences Campus" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none text-xs" />
         </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Executive Oversight *</label>
-          <select id="modalExecutive" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-            <option value="Frank Holmes">Frank Holmes</option>
-            <option value="John Perry">John Perry</option>
-          </select>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- Tier 1 Dropdown -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 uppercase tracking-wider text-[11px]">Tier 1: Executive Oversight</label>
+            <select id="modalExecutive" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-xs">
+              <option value="Frank Holmes">Frank Holmes (Principal)</option>
+              <option value="John Perry">John Perry (Associate Principal)</option>
+              <option value="">-- None / Unassigned --</option>
+            </select>
+          </div>
+
+          <!-- Tier 2 Dropdown -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1 uppercase tracking-wider text-[11px]">Tier 2: Project Leader</label>
+            <select id="modalPM" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-xs">
+              <option value="Robert Phillips">Robert Phillips (Sr. PE)</option>
+              <option value="Maggie Laracy">Maggie Laracy (Sr. PM)</option>
+              <option value="Liza Kimball">Liza Kimball (Sr. PM)</option>
+              <option value="Hannah Schur">Hannah Schur (PE)</option>
+              <option value="Coleman Horsley">Coleman Horsley (Sr. PM)</option>
+              <option value="Frank Holmes">Frank Holmes</option>
+              <option value="John Perry">John Perry</option>
+              <option value="">-- None / Unassigned --</option>
+            </select>
+          </div>
         </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Project Manager *</label>
-          <select id="modalPM" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
-            <option value="Robert Phillips">Robert Phillips</option>
-            <option value="Maggie Laracy">Maggie Laracy</option>
-            <option value="Hannah Schur">Hannah Schur</option>
-            <option value="Coleman Horsley">Coleman Horsley</option>
-            <option value="Frank Holmes">Frank Holmes</option>
-            <option value="John Perry">John Perry</option>
-          </select>
-        </div>
-        <div>
-          <label class="block font-semibold text-slate-700 mb-1">Assigned Delivery Pod (Optional)</label>
-          <select id="modalPod" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+
+        <!-- Tier 3 Standard Pod Dropdown -->
+        <div id="tier3PodSection">
+          <label class="block font-bold text-slate-700 mb-1 uppercase tracking-wider text-[11px]">Tier 3: 2-Person Delivery Pod</label>
+          <select id="modalPod" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white text-xs">
             <option value="">-- Unassigned --</option>
-            <option value="Pod Cobalt">Pod Cobalt</option>
-            <option value="Pod Slate">Pod Slate</option>
-            <option value="Pod Navy">Pod Navy</option>
-            <option value="Pod Steel">Pod Steel</option>
-            <option value="Pod Granite">Pod Granite</option>
-            <option value="Pod Indigo">Pod Indigo</option>
-            <option value="Pod Teal">Pod Teal</option>
-            <option value="Pod Copper">Pod Copper</option>
+            <option value="Pod K-C">Pod K-C (Katie Laresch + Christian Allora)</option>
+            <option value="Pod M-S">Pod M-S (Madison Servin + Sara Walsh)</option>
+            <option value="Pod N-M">Pod N-M (Nick Gulas + Matthew Zannini)</option>
+            <option value="Pod S-O">Pod S-O (Sarah Flower + Olivia Munn)</option>
+            <option value="Pod K-M">Pod K-M (Katie Laresch + Megan Thomas)</option>
+            <option value="Pod M-M">Pod M-M (Madison Servin + Megan Gutierrez)</option>
+            <option value="Pod S-J">Pod S-J (Sarah Flower + Jennifer Motsko)</option>
+            <option value="Pod H-M">Pod H-M (Hannah Schur + Megan Thomas)</option>
           </select>
         </div>
-        <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
+
+        <!-- Override Button / Toggle -->
+        <div class="pt-2 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <span class="font-bold text-slate-800 text-xs">Custom Staffing Override</span>
+              <p class="text-[10px] text-slate-400">Bypass pod assignment to assign anyone from any tier (e.g. John Perry + Robert Phillips only).</p>
+            </div>
+            <button type="button" onclick="toggleOverrideMode()" id="overrideBtn" class="px-3 py-1 text-xs font-bold rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 transition">
+              Enable Override
+            </button>
+          </div>
+
+          <!-- Override Staff Selection Panel -->
+          <div id="overridePanel" class="hidden bg-slate-50 p-3 rounded-xl border border-slate-200 mt-2 max-h-48 overflow-y-auto space-y-1.5">
+            <p class="text-[10px] text-slate-500 font-bold mb-1">SELECT SPECIFIC ASSIGNED STAFF:</p>
+            <div class="grid grid-cols-2 gap-2" id="overrideCheckboxes"></div>
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
           <button type="button" onclick="closeModal('addProjectModal')" class="px-4 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold transition">Cancel</button>
-          <button type="submit" class="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">Save Project</button>
+          <button type="submit" class="px-5 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-sm transition">Save Project</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- APPLICATION LOGIC -->
+  <!-- ========================================== -->
+  <!-- APPLICATION SCRIPT & DATA LOGIC            -->
+  <!-- ========================================== -->
   <script>
-    // --- 0. SECURITY & AUTHENTICATION ---
+    // --- 0. AUTHENTICATION ---
     const APP_PASSCODE = "LanganBosCivil";
 
     function checkAuth() {
@@ -465,106 +502,110 @@
       inp.type = inp.type === 'password' ? 'text' : 'password';
     }
 
-    // --- 1. INITIAL SEED DATA ---
+    // --- 1. EMBEDDED AVATARS (FROM TEAM PHOTOS DOCX) ---
+    const AVATARS = {"Frank Holmes": "data:image/jpeg;base64,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", "John Perry": "data:image/jpeg;base64,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", "Maggie Laracy": "data:image/jpeg;base64,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", "Coleman Horsley": "data:image/jpeg;base64,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", "Robert Phillips": "data:image/jpeg;base64,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", "Hannah Schur": "data:image/jpeg;base64,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", "Sarah Flower": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDqKKKKACuN8TeO7XR9Qaxt4Dd3Ef8Arfm2qh/u57n+VbXi3VjougXV5GMyqNsf+8eh/Dr+FcZ4N0q0kjeS5SOW6dt7FyC2CAen51hWq8miOnD0Pas1/DPjy21a7a3u4BZsThG37lOegJwMfXpXaV5p4v0Szt0fVNLMWyNCLiOM8H3Hb6iuv8G3r3mhQGZi0sY2Fj1I6rn8P5UqVbmdmFeh7PY3KKKK6DmCiig8UAcL8SrkyPpunAfJLKGb3/yM/nUOj2sVpf2V0Lh9ztuYsxIHHTH41keKL+TUvFXl8YtZQkYHcY/xIp3hnU1u7sRt5UdzbjYpmUMkidQcHjI6fUGvMnJyk2j1sMlFJPc6a60iJrDWVV3xJCxw7k7hjI9u1VPhtevLHsZSA8Ckntkcfypni/WLe3gks7J1e9ulAnkT7sa4xxjgemBVnwFJDCkMUOCksXB7ggf/AK6dOVpoMSk4tI7SiiivSPJCmXQ8uymmfKxKpJb8KkUbmAHc4qx4iuIovD8xRQVMLDb6HBGPzrKrPlVjWnDmZ4hezvqGsPfWoRS7gsFIOPoBSaJbCC4uJZWyxmZ1Hpk5xXR+CNLjg1uC4v4XmgjjbMUJAO4jr6E81J4t0Wz0m6jk05mayuAdjsCCrDqpz37j/wCtXnpO1z0YW5rHG6pcA6q80rHDDAX1xW94UuZY9Wt7iRsbnIEZ4G3AwMflWTbRebrr5Cu8S/u9wyo5xnHc13HgrTrS+1MSFGL2/wAwZ+5z1/M0o3lKyFN7tndC0kdA0Xz57DrVeultrdkkh2LzyxPoo4FZevwLBqkoj+6wVx+IzXpQk3ozzZxS2KEeTIoX72ePrUOswvMogjPyXAJwfz/wAPOrECkliv31G9fqDmk11vLlsJYxhfPGM/wB1v8msqyuzajojL8LaRLayxrOoJUlfQ/jWtrOn7/lMYIcbSp5B9MitiQKtwZvfAP5VYcLcNESP4hUKFlYtzbdzwm20+ddZklkQIOQFXsM9D716h4C0ny1l8xTvYgqfTPNSXei239tFyv7wsDgH5ecc4rsNKiS3UlAAQhbH4cVFOnaVx1Kl1YiupAqFIvvSssS/r/jWV4pA/tCNl6GIfoSKtSsU1JWJGy2jMn/AjkD+RNU/ES4lt2/6Z4/KuqG5zS2P/9k=", "Nick Gulas": "data:image/jpeg;base64,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", "Katie Laresch": "data:image/jpeg;base64,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", "Madison Servin": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD1SBa0IFqnAOlaEA6UAW4Uq5HHWZqF/BpdhJd3JwiDoOrH0FeIeM/EOua9qLwwecIYz8yxbtkIHX0y35n+VROoolwpuex9EiI46GmtHxXy/wCDPEmuW+qyXUd3eIofBd33gY7SIeSPftX0h4Z1qPXNOEpVY7lMCaMHIB7EHup6g0o1FJ2HKm46k8qVSmStSYVQnFaGZhwGtGA1lQNWhA3IoA5Tx1fNNfwWi58uFgWGepP+f0qz4bsbfYVQRsT94Agn8a4db2TUfFM0V2haKSV3Uf7PQVtxeHW0yebVJZ42ZR+7CW6Jtz2yB9P8mvMnJVJNs9ehBwhotzodU8J6UXlu4tPjF2AWSVVwwPrWH4Y1aPR9cVg4ECFYZgOmx8Y/75Y1Z12zutZtozbzeUqt8yys+CMf7LDP41xniC0XSpIIJGSOWdNrKhO0+u3Jzweeaz5uVqUWVUpuSaaPoOY9aoTnrUWmXBn0mylc5Z4EJ+u0Ukz16yd1c8dq2hz8L1cjkAUknoKyonp9xcBFjj7ytj8ByaU5csWxxV2kcPe+VZ+I7ZuF8yRogT3PUD8ga6XWLi5lura0nWNY3UNHKZdq+w5HB+tcX8QUMulGeFSzi5jcEHkfvOtdNot/MQkeoI88QA2yquSB6Ef1ry42dj2KUmtGatvd3UOqRwpH50hG6QxyK6hemGxwDXH+OLUap4nskcBfKA47hmP+AH510viPXzoej3F3ZWwHG1WkXaGJ6YHU15tomrtM0+ralLuny21fV+mfw/rUSdti5u+h73paG00mzt2bc0UKoT64FLLJ1rnvCviG21fSojHOjTxqFkUkZ+uK1JZK9am04qx4k01J3OZvdRWxiMjrwBnJPFc5Z6vNe3lzdPIAFURxpjGzPJP6VoeKCBYIHBKE5bAyfb9aw9FsRJpilGwZXZmPcc9/wArzateU732PSp0FG1tyxczKbZA3zI1xGmOvfP8ASu2061iTTo5sgfLxWDPbW40a2jkiBR5C+OhGOhz2p0165hVIywjC4A/rWSdjqVN20MD4pXf2izitVJ+T943oMf5/WvKYLieOYwSowU/MynsTxx9a9kOhLrUE9xKpL8KnONwByQfUVg+IfCTA7odhJGT6lvQUm1bUUou+hh+HNKuXiFynmIittEwONp/untivUfDUt00SrK0m7cVZT0JHf2/Cq3hOwNloaRsDtkfcwP8Ae7/0roLOJYIHkiBD3LgAZ4A6DHpxzUqUt0wcItWaP//Z", "Megan Thomas": "data:image/jpeg;base64,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", "Christian Allora": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDtPL46Unl1e8uk8uvOudzKgj9qesXtVkRVIsdUmQ0VliqRYfarSRVMsVO5NiosPtT/ACeOlXVip3lcdKdxWKeyk2VOozS7RWJ0MhEdEskFsoa5mihUkAGRwoJ9OaL67h07T7q+um229tE00h9FUZNfP+raR4p8X3iXl1cGCC7PmpC8hKRIfugr24o5ox+J2CNKVTSKufRax4xUqx14/wDD248Q+D/Etp4f12Y3+l30vk29wSSY32lhjPY4xivaVWrTTV07mc4uDtJWZGsdP8vipkSn7RiqMzGHSjHNNU8U8VkdDMLxzbT3ng/VLW1Te80JRlA5Kk/Nj3xXmMNvHaeJ4ryfVJGtidpt1LYUHjbx0H0Fe0XNzDZW0t1dSrDBCpd5GOAoHc14z4k8nTfFt9FPC8bpcErlN2ATnntWVRO61OvCTik01tqbWh+H1F8jw3s1zcx38c6KwYFAG3A4PbB68ZHFexr14rh/AMMUzz3kMTRpjauRjcTyT/n1ruE4FdFNO12cuKnFytFbEy04jihBUm3itLHLc5ZHyKxPFHjPR/DER+33Ae6xlbWIgyN9f7o9z+tbNuQQoPTIr5L8b3xvPEuo3BkLtLcSMT6jccfpipo0+d6m9WXKjc+IXxE1XxW32d2W10sHP2WInDntubqxH4D2r1z4VTWXxJ8LRDxCGS+sALWS9TG8YXKFvUFR37g1827vlyO3Wu4+EnidvDniSaF5dlhqtu9pMD93cVPlsfox/JjXZUorl0WxzQqSUr3PVPGGr6l4a8KaL4g8KXaz2oupba/EiZikJCmLC9l2g4IOctzXSfDH4k2vjK4lsJbNrLUoovOKB96SKCASp6jGRwfWubFnJqXw48V6YmSrWialAn92SLAbH1GPyry/4T6h/ZnxI0C4V9scs/2eT3SRSv8AMj8qapR5WktiZTbfM+p9dpUnamoMGnN0rGw7n//Z", "Megan Gutierrez": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD023bir8HJrEt3PrWpasfWm2Qom3arWrAvFZdlyBWrHwtRc0SL0eAtDgGqysfWnZJ70htDJQKqyDmrbLmoHSqTIaPN7c1pW8oB5rMtnDAVZBwalspI6WxnXArgvGXxm0/Q9SfT9LtUvpon8qWaWby4g/TauOWI7noPeug1K8+waDf3ucfZ7eSUH3Ckj9a8E+HVhbXl07apbiV5TwzpuAGepPuc/nWcqllc3p0ueVj2zwD8VrPxNrC6ZdWhsrmUH7O4k8yOUjqoOBg8HHr9a9NRxXyJrjW2j+LoJ9KxD5EglGxdoDKQc4r6whnjnhjnhYNHKokQjuCMj+dXCXMrkVYcjsXSRioJD1pgmx1pxYGrMWeU2U+AM1opKr9DzXOxMQo5rSsmyRWLZskV/iZfiy+HernODLGsA/4EwH8s1w/w9vo7zw7ZwQvHsWRvMbn5WDdGxnr/AEro/ipc6LJ4UurPVNRt7eYASRxGUeYzjkAJ1Oa8v+GdtLp0cxkuHt3clw4baMHtzwaxq2ULs7MK2p6G38TL6Pdp0B2CbLcfxFemSK97+Hd2bnwHoUjHLC0RD9V4/pXyf4zbZ4nLytIcpw8hyWNep/Bv4g29njQ9TlCW7N/o8xPCsf4D6A9Qa0pK0UZYluc2e8mXnFOWWs95BnINKk3vWxxs8wjbIqPXdSbS9IaWJsTyMIoz6E9T+ABpsDZUVzvjmYtcabbg8BXkx+IH+NY1NItnTRXNNJnifim6bUPEN/O7FiZCu4nJIHHX8Ko2rypPEVmMe1gQzEkIc9cc/wAqs+IIvs2vX0XbzCw/Hn+tVYWPnJtjEpzwhBO7245/KuqFuVWMal+d3Ipd7tlpGzjOeuK39DVnu4NjDG7Cknv3NYcJBZS3T3q5aTSrNGIV5LblA7VM1oVTep9W/DbVLi+0WWK7kaSa3l2ZY5O0gEf1rsEJzXlvwmmkWSWOQ5aSAM3uQRz+temIxzWdJ80R4iPLNpH/2Q==", "Jennifer Motsko": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3iiiirEFYfi3xVpHhPTlvNcuhDG7bIkUbpJW9FUdf5DvW4Bk4HU147Lo+l+N/Ft5q2vYuooLhrXToGlKrGkZwW2g8lm3E/hWVaqqUbs2oUXWlyo6Xw58VfDevalFYwPd20sreXG1zEERn/ubgTg+metd7Xg/j/wCHejW9rLdaA32TULdTKYlmLCUdSCpPHqCOhr1D4aeIG8SeDrK9nbddpmC4PrInGfxGD+NRQr+1ujTEYZ0bM6iiiiug5QooooAZPIIoJZCcBEZs/QZrxXwnp1lPottPeOwu4p3KBOhYtnJ9cZzXrviC4gttFvWupo4UaGRQXYLklTwM9T7V4P4b1Kex8VDTMCax1FFdUY48uVV+8D2JAA/KuPF62R34FqMm2egPZaULu8uNri9nDfxfKwOQGK/41R/Z9Dw6Nq1s5yEnjcHscqQf/Qak8VfaYtDvns0MBMLL5jvukJx0Hp9a5/4S65b6BrUGl308cEN7EIUeRgoMygFRk+oLD8qww0lGZ043342XQ9yooPBweDRXpnjhUN9dQ2NlcXd24jt7eNpZXP8ACqgkn8hU1eaftFax/ZPwq1NFfbLfvHZp7hjlv/HVb86GCPnx/FF/408d3GvapKws4i/2eF2JjgQ8KqjscdSOSa6zwxrul2XjOH+2JVgR4vNtppW2qmccH0z2+leGWzyeYgjZ8Z+6rYya3biWa4m82ZsyEAZ9ABgAfQVzrDOrUbb0OyFZQhZLU+ofG+u6e+lfZbW7gmmdiHELBtuOoOOhr56+Kuow3jWMMIAZNztg9OgH8jWFPrGo2iyyxXBLTvukZxuZm9STzmsK4uJbh2kncu56k1hDCSpVbt3RrWxMalPlSsz3L9nH4janF4mtvDGsXst1p14pS1M7FmglAyqqx52tgjHrjGK+pK/PDQ9QfStasNQjJ32lxHOMeqsG/pX6GxyLNGssf3JAHX6EZH6Gu2J58h1fNn7XusHz/D2jIeFSS8kHqSdi/wDoLfnX0nXx1+1HePc/FSeF/uWtnBEn0K7z+rGmwR5xpaqsfmHG48D2FaBYGsexf92R6GrgkPrXVTS5UVcdqJzb4/2hWQ5+WrV7IWTGeM1QJzWFZe8DY/t+Ffob4afzPDekOerWUB/8hrX54j061+iujwG20ewgPBitooz+CAf0rOJLP//Z", "Olivia Munn": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3iiiirEFQX15bWFq9zfXEVvbxjLSyuFVfqTU9eTeJLVvHHj3UNLvZZV0bRgkawIcCWdlyzk+wOB+PrWdWqqUeZmtCi60+VHa2njjw1d6gtlbaxavO2NpBIRiewcjbn2zXSV4P42+G1jo+mS6lo7zGeBS8kLHf5idxj9a9C+EeuSaz4SRbly9zZv5DMxySuAUJ/A4/CsaGJVV2N8RhHRVztqKKK6jjCiiigArx/S7NpfF/i+aO8aNodTLbVAO7KDGc8j8PSvYMgcnoOTXy1pPi8ad8QtVk1E/8SzV5ikr7seURIdkgPt0Psa5cWm4pLc7cDJRnzS2PaNQ09bgXc0tzLvkidPKzhHOMZx3rm/gLIyXesWzPuzFG/wCIYj+tafirWLez0aa4tGW5upovLSY7UVQfT1PsKwPgVmPX7uNjy1qfx+cGuPCpxmj0MdKM6bSPbaKKK9Y8IKKKhvLlLKzuLuU4jt42mb6KCx/lQB5J8QvjPY6Nr9x4b0qye+vRm3mufNCRwyEYIHBLFc89BnivnHxfPvmZF5AJHPfniq+jXEeo+I5b6/kAlkla4yzYBdm3c/maPE1wkl5IqFSSxzjmuWcm6qR104L2Mm2VPD8LS3oYEhkB8sD+97V674O8ZL4Kvhqd9byXKLHsmijYK3zcHGeMjrivKdI1C3sIA0iO8oYuMEDn0/SqupapPfSSNKeGOcCpmpzqabIuDhCk77s+1fBfxH8MeMZRBo2of6btLm0uIzFLgdcA8Nj2JrsK+B/AuqyaN4y0PUInKG3vYmJH93cAw/FSRX3ywwxA6AkV1p3OJiVx3xh1IaV8MPEtzu2sbNoE/wB6QhB/6FXY143+1TfG2+HFtbK2Dd6hGpHqEVmP64psR8oKMAY+tFRq/FLuqCrjyBmmv900B+aaSzttQFmPQAZJoAVHKAOOq/MPw5r9ELKXz7K3m/56RI/5qD/Wvzrz+7P0NfodoyGPRtPQ9VtolP4ItOImf//Z", "Sara Walsh": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3iiiirEFU9V1Ox0ixe81S7gtLVPvSzPtUHsPc+w5q4OTgV8++IItR+KvxFv8AS/tP2fQNIdoo1A5L/dLn1JIPPYCoqVFTV2aUqbqS5Ue16H4m0TXgP7H1WyvGK7tkUo3gepU/MPyrXr5Y+J3w+uvAxttb0S/mUQuu51OHhPYqR2yAPxr374Z+Jj4t8F6fqsoRbpwYrhUPAlU4b6Z4bHvU0qqqLQqtRdJ2Z1NFFFamIUUUUAQ3svkWdxMW2+XE75xnGFJzj8K+f/g3aLNpVxqMl1PHdte7gFJUucfxdznJOPrXsnxDvbaw8Ea3PeFvJ+ySKVVgGbIxgZI55r5/+AmqSnWr/TmcSW0uyRFbgeagPQ9QcZ/KuTF3asjvwLUZ3kdl8XAw8IapdT3s05k2hbdmG2Jtwx9PpUX7LOoSPpmuaezJ5Uckdwi4+bLAgn6fKtV/juJl8JOCEigN1Gdic7+cncT16cCuK/Z78RLo/jqOGXcLbUVNu53fdJOUJ9eRj8azw3uq7Nca1OVl2PrKiiiu88sKjuZkt7eWeU7Y40LsfQAZNSVyvxPujaeCr8hipl2xZHXBPP6Cmld2E9DwH4v+OdT1yVrVd9vYODtiCg8cYBbrnOCRWD8Nn1HS7ldRgkWNhkjKghiBjofxrcuo4rrKMiF1UsCRnnkA4p9jYtbW8Ue1dygltvQkjn8M1t9Wjz3lqg9u1C0dGTfFDXtU1fSBaXDRmNZA22GIckd68w8OvcWupwT25eKdXDKxPQ9M/Uda9UeAtExcZGSP5VzsenR2F9JISHEjBGTbx1NKWFi2uXRDWIlZuWp9M/D/AMQv4k8Ppc3Kol3G3lzBOhOOG9s10teQ/Au6Bv8AV7Zd20wxyYPTIJHH4GvXqiceWViYu6uFcD8apTH4QTDYBuVB/wC+WNd9Xmfx5uli8NWMG4B5rhmxjJwsbZx+Yoh8SHLY8Z06b9/cA8kKpGO2Qf61spcxtvxzw2M/hXL6YSZbnbkltgHboATW1AoVD8pzjv8AhXac5oSzIV4BC88g+pH+FYWtSoYhLgrtbKjt34/Wr8uCpyCCf7vXqaz9SJGk3kYTdvCtktjbtOeP1ouB6H8AnLeI9TGWwLTkHp95K9yrwL4BzMni+6j5KzWr9+BtKGvfa5K3xG0Nj//Z", "Matthew Zannini": "data:image/jpeg;base64,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", "Liza Kimball": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDj6MCkzRmmWBFYuqax9lm8qGMOwOCWOADW4JEjVpJD8qgn8a56yht7u/eKQhyfmfuFz3NRKVi4xuQxeI0+0BJowFJwSp6f4iugjdXQMhBUjIIrnE0KK9uD9kOVbewGOQoHWtHR2AgCBgwHoehojK4OLWpp000uaQ1ZBJmjvSA0A0AY3ied0t1ijOGf5fxPArttB0a60oeXb2qKipl59/Lkeoxzznr0rh/EaEwySgEiPa/HopBNeim9uZtOWWGUywXDAB4scK3IJyelctZs7sLFO9zVuobyVYJtOjgDtGvmA/LkEZxkV5p4os/7F8WxqieWl3H58iKcqr5IbHtnn8a9LjF3HbW5aQyTnCAwsq49yATkevNcL49njfX4IWcSTxWpMnsGbI/kazpNqVjfExTp3K9IajgffEre1PzXceWLuo3VEpLMAASScAAZJrXs9JY4e9JiT/nmPvn/AAq4QlN2iiXJLc57VZRtZeobC/hU3gya903T1jVTc2Suyhc8qM9Kp65bjTJ5UKHyGfcgznAPUZro/hvHIbm42J5lo672HXac4/oa5K0XC6kdVB8zTR2Vrfi5hSO0tpUY4BaQYC/4mvF5Lrfq2pXlxL5sktzJuJPO1eB+lfQAt0WI+Qp3dh6V89a9Yv8A27PYWCmVmkKjA7knrUUt7I3xTbSbNrQrj7TY+ZjALtj86vmtjRtJhsdMt7RkSTy1wzY6nufzqtq9mLWRWjz5T9M9j6V6c8NOnHmZ5caqk7FrQEMEP2gRsJJAQspxgD0Hf8a0UOT83OahJVFSJBhIwFA9qejZPUV6VGChFI5pu7uPuLW3uk2XESSL6MM11fhqHT4LQJp9ulvMDueJT971x7fyrmFNSxytGwKsQRyCO1ZYrCxxEez7m2HxDoyv0PQXZPs5ZAORxgdzwK4nXrKxg1E/ZLeKNlXDsigEk/5FWItcuUTHyMc5yw7+tZc0xldmYksTkk9zXHhMDOjU559NjqxWLjVhywGIOap67Hv04nuhDf0P86uIc0y9AdTEejIf1r0qkeaDR50XZ3P/2Q==", "Mario Marchante Rodriguez": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3XFGKl20ba5DYjxTgKCMUm7B9zTFceBRt/Ovmzx14u8beMPE2p6f4XvP7M0Oyna2WSJ9rTlTgsWHJ57DA+tTeC9f8bfD6eWXxK0uu+HnIMzLKZJrYf313ckeq/wAqTaTs3qWqc3HmS0Po0CnqKr2N3Bf2Vvd2cqzW1xGssUi9HVhkEfhVtRTuZjHyOlV5WKjOTVuTrj0qtOPkNJDM25kcDg1y/iq9urbQtTktJGFwtrKYzycNsOMe9dTcr8tYGqxZjYdMgitEiWeI+Adbg0zRtHt5LaQGS3VmcMoySSScE5Pua7i911Z9QuNESxkld42UuzjB3KQCF7jPvmuXurmHStMt7B4nlvVfyvLReSVODz0HUfnXW6RrkH9pCK7s57WV1LqZVAyo55b/ABrhqr3nKx7NHSmo8x0f7P8ANczfCzSUvFcNbvLAm8c7Fc7fw5x+FeloOK5n4fac+m+E7KCQEM26baRjaHJYD8M11SLwK6o66nkzSTsiGQfN0qvMvy1ckHQ96gkGVIpokzp0ytZF3B5hweneti4mRVOTWXOssiM6/IPuj1JPatYolnj/AMR7ZrTV5brT7Y3H7tVuY1HzBsfKy8c8Yz9BUPglLjW7iIapDLbaTat5s9zOuxpVyMgAdOmCfSu/1m3Ezp+7IuVyrSHgYHIB9c84/Gr3h2ynurq2NxCI7Ix/aeT/AKwDG3I/u5IOO+Pzyq05c9kvmddKqlS1fyPRI4gowMAe1WFXis+3vPlUTDaSeD7ds1oxsDVWtozm3K0siqOmayb+92A7RzVy6fg+grAvmy4X1NOC5nYTdlcLZw7ySSNyuRz9M/0NX7pQWs1XpvBFc/4kLWNjdyxZ3IpYD1HP8uRW9YyC7ltmXlIow5+pGB/WuhmaHXtuHG1RhpSI8jsCf/11bZER8qoGBtGPT0pJuXjbsHAH5E0E5jGeT1/OpGNu/lgDenJq3Zy4dRn5W7elVZA81lIrIUbJUA9xnr+I5qppc7vtL/ffcxGfujOAP8+9Jq6Hsz//2Q==", "Richard Schlichting": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCABAAEADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD3iiiirEFU9U1Sx0qATaldw2sZOA0rYyfQetXQMkD14r5q8TadrvxS8W3d3b3EdtodrM9pAJGIKqpwWC9yTyT9PSs6tRU1dmtKk6srI+itN1C01OzS60+4juLd/uuhyP8A61Wq8I01b/4X3dgbbUJLzSLm6jhvLeVQRhztEiejD9RXvBGCR6HFFKqqsbodejKjLlkJRRRWhiFFFFACqcMD6HNeTDR00OaWC3u54JI7uWQAD/Wb3Lc/ga9P1G/tNMspbzUbmG1tIhl5pnCIv4mvOovEdl4snvtQ8PKb2yt50gbKlSzhAd6g88g499tcuLi3C66HdgJqNSz6mfNo0WuXEFvc3VxM817E5Xp5YWQNx6cCvXycsT6nNeS3vi2x8H3mn3/iOFrSyuJpIo1jXfIG25MjKOcDp6/NmvTNG1Ww1vTor/SLuG8s5BlZoW3L9D6H2PNGEi1C76hmE1KokuiLtFFFdRwhXKfFPxFc+FfAeqavYCI3kIRYfNG5QzOFyR3xknFdXXh37VmpNB4Y0XTlbAu7tpXHqI04/V6GCPn7xJ4n1vxPdCfXdSub1gcosjfIn+6o4H4CvaP2TLiOXUPEml3HzK8Md0oJ7jKH9CK+f1xwPrXrX7M9/wDZPinbRE4W8tZYcepADD/0E0GsH7yLf7T8yx+LNM0pDxZ2QkkGeA8jE/yUV5b4f13VfD9z9o0XUbqxlyCTDIVDY/vDo34g11nx11Iap8WPEUqtuSK4Fsv0jUL/ADBrz6RsNtHpSSsE5XbbPtv4SeJLrxZ4B07VdRMRvXMkUxjXaCyORnHYkYOK7GvCf2UNUM2ga7pbtn7NcpcIPQSKQf1T9a92pmTCvmP9q6+MnivRLLPyQWTS493kP9EFfTlfK37Vtu8fjzTZ8fJPpygH1KyOD/MUMaPGkb5se9dh8K9UTSPiP4cvpW2wxXqeYx7Icq36GuJXcr/NjnpVu1hnuriKC1jeWeRgqIgyzE9hRe2o0WdWvnv9Svb2Q5e4mkmJPqzFv61mF8zJ9KdMxUFTkEEgg1WQsz7gM4oA9z/ZUvGi8d6paZ+S509mI90kUj/0I19T18k/supI/wAT2dQSqafOXI7AlAM/jX1tQJn/2Q==", "John Plante": "data:image/jpeg;base64,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"};
+
+    // --- 2. INITIAL SEED DATA (19 STAFF INCLUDING LIZA KIMBALL) ---
     const INITIAL_STAFF = [
-      { id: "fh", name: "Frank Holmes", role: "Principal", tier: "Executive", rate: 430, photo: "" },
-      { id: "jp", name: "John Perry", role: "Associate Principal", tier: "Executive", rate: 430, photo: "" },
-      { id: "rp", name: "Robert Phillips", role: "Senior Project Engineer", tier: "PM", rate: 375, photo: "" },
-      { id: "ml", name: "Maggie Laracy", role: "Senior Project Manager", tier: "PM", rate: 375, photo: "" },
-      { id: "ch", name: "Coleman Horsley", role: "Senior Project Manager", tier: "PM", rate: 375, photo: "" },
-      { id: "hs", name: "Hannah Schur", role: "Project Engineer", tier: "PM", rate: 355, photo: "" },
-      { id: "ms", name: "Madison Servin", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: "" },
-      { id: "ng", name: "Nick Gulas", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: "" },
-      { id: "kl", name: "Katie Laresch", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: "" },
-      { id: "sf", name: "Sarah Flower", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: "" },
-      { id: "mt", name: "Megan Thomas", role: "Senior Staff Engineer", tier: "Senior", rate: 275, photo: "" },
-      { id: "mr", name: "Mario Rodriguez", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
-      { id: "sw", name: "Sara Walsh", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
-      { id: "om", name: "Olivia Munn", role: "Staff Engineer", tier: "Staff", rate: 260, photo: "" },
-      { id: "ca", name: "Christian Allora", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
-      { id: "mz", name: "Matthew Zannini", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
-      { id: "jm", name: "Jennifer Motsko", role: "Staff Engineer", tier: "Staff", rate: 245, photo: "" },
-      { id: "mg", name: "Megan Gutierrez", role: "Staff Engineer", tier: "Staff", rate: 230, photo: "" }
+      { id: "fh", name: "Frank Holmes", role: "Principal", tier: "Executive", rate: 430, photo: AVATARS["Frank Holmes"] || "" },
+      { id: "jp", name: "John Perry", role: "Associate Principal", tier: "Executive", rate: 430, photo: AVATARS["John Perry"] || "" },
+      { id: "rp", name: "Robert Phillips", role: "Senior Project Engineer", tier: "PM", rate: 375, photo: AVATARS["Robert Phillips"] || "" },
+      { id: "ml", name: "Maggie Laracy", role: "Senior Project Manager", tier: "PM", rate: 375, photo: AVATARS["Maggie Laracy"] || "" },
+      { id: "lk", name: "Liza Kimball", role: "Senior Project Manager", tier: "PM", rate: 385, photo: AVATARS["Liza Kimball"] || "" },
+      { id: "ch", name: "Coleman Horsley", role: "Senior Project Manager", tier: "PM", rate: 375, photo: AVATARS["Coleman Horsley"] || "" },
+      { id: "hs", name: "Hannah Schur", role: "Project Engineer", tier: "PM", rate: 355, photo: AVATARS["Hannah Schur"] || "" },
+      { id: "ms", name: "Madison Servin", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: AVATARS["Madison Servin"] || "" },
+      { id: "ng", name: "Nick Gulas", role: "Senior Staff Engineer", tier: "Senior", rate: 320, photo: AVATARS["Nick Gulas"] || "" },
+      { id: "kl", name: "Katie Laresch", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: AVATARS["Katie Laresch"] || "" },
+      { id: "sf", name: "Sarah Flower", role: "Senior Staff Engineer", tier: "Senior", rate: 295, photo: AVATARS["Sarah Flower"] || "" },
+      { id: "mt", name: "Megan Thomas", role: "Senior Staff Engineer", tier: "Senior", rate: 275, photo: AVATARS["Megan Thomas"] || "" },
+      { id: "mr", name: "Mario Rodriguez", role: "Staff Engineer", tier: "Staff", rate: 260, photo: AVATARS["Mario Marchante Rodriguez"] || "" },
+      { id: "sw", name: "Sara Walsh", role: "Staff Engineer", tier: "Staff", rate: 260, photo: AVATARS["Sara Walsh"] || "" },
+      { id: "om", name: "Olivia Munn", role: "Staff Engineer", tier: "Staff", rate: 260, photo: AVATARS["Olivia Munn"] || "" },
+      { id: "ca", name: "Christian Allora", role: "Staff Engineer", tier: "Staff", rate: 245, photo: AVATARS["Christian Allora"] || "" },
+      { id: "mz", name: "Matthew Zannini", role: "Staff Engineer", tier: "Staff", rate: 245, photo: AVATARS["Matthew Zannini"] || "" },
+      { id: "jm", name: "Jennifer Motsko", role: "Staff Engineer", tier: "Staff", rate: 245, photo: AVATARS["Jennifer Motsko"] || "" },
+      { id: "mg", name: "Megan Gutierrez", role: "Staff Engineer", tier: "Staff", rate: 230, photo: AVATARS["Megan Gutierrez"] || "" }
     ];
 
     const INITIAL_PODS = [
-      { id: "Pod Cobalt", name: "Pod Cobalt", color: "#2563eb", lead: "Robert Phillips", senior: "Katie Laresch", staff: "Christian Allora" },
-      { id: "Pod Slate", name: "Pod Slate", color: "#475569", lead: "Robert Phillips", senior: "Madison Servin", staff: "Sara Walsh" },
-      { id: "Pod Navy", name: "Pod Navy", color: "#1e3a8a", lead: "Robert Phillips", senior: "Nick Gulas", staff: "Matthew Zannini" },
-      { id: "Pod Steel", name: "Pod Steel", color: "#0284c7", lead: "Maggie Laracy", senior: "Madison Servin", staff: "Olivia Munn" },
-      { id: "Pod Granite", name: "Pod Granite", color: "#334155", lead: "Maggie Laracy", senior: "Katie Laresch", staff: "Megan Thomas" },
-      { id: "Pod Indigo", name: "Pod Indigo", color: "#4f46e5", lead: "Hannah Schur", senior: "Sarah Flower", staff: "Megan Gutierrez" },
-      { id: "Pod Teal", name: "Pod Teal", color: "#0d9488", lead: "Hannah Schur", senior: "Sarah Flower", staff: "Jennifer Motsko" },
-      { id: "Pod Copper", name: "Pod Copper", color: "#b45309", lead: "Coleman Horsley", senior: "Megan Thomas", staff: "Mario Rodriguez" }
+      { id: "Pod K-C", name: "Pod K-C", color: "#2563eb", senior: "Katie Laresch", staff: "Christian Allora" },
+      { id: "Pod M-S", name: "Pod M-S", color: "#475569", senior: "Madison Servin", staff: "Sara Walsh" },
+      { id: "Pod N-M", name: "Pod N-M", color: "#1e3a8a", senior: "Nick Gulas", staff: "Matthew Zannini" },
+      { id: "Pod S-O", name: "Pod S-O", color: "#0284c7", senior: "Sarah Flower", staff: "Olivia Munn" },
+      { id: "Pod K-M", name: "Pod K-M", color: "#334155", senior: "Katie Laresch", staff: "Megan Thomas" },
+      { id: "Pod M-M", name: "Pod M-M", color: "#4f46e5", senior: "Madison Servin", staff: "Megan Gutierrez" },
+      { id: "Pod S-J", name: "Pod S-J", color: "#0d9488", senior: "Sarah Flower", staff: "Jennifer Motsko" },
+      { id: "Pod H-M", name: "Pod H-M", color: "#b45309", senior: "Hannah Schur", staff: "Megan Thomas" }
     ];
 
     const INITIAL_PROJECTS = [
-      { id: 1, name: "Hudson", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 2, name: "Natick Senior Housing", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 3, name: "Plumley", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 4, name: "Bedford Shopping Center", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 5, name: "EPE Tewksbury", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 6, name: "Heading Home", executive: "Frank Holmes", pm: "Frank Holmes", pod: "" },
-      { id: 7, name: "Andover H.S.", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 8, name: "Medway Public Safety Complex", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 9, name: "Rhynland Tyngsborough BESS", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 10, name: "Brandeis ADA", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 11, name: "Amazon Douglas", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 12, name: "Centech UPS", executive: "John Perry", pm: "John Perry", pod: "" },
-      { id: 13, name: "Faneuil Gardens", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "" },
-      { id: 14, name: "Trinity Lowell", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "" },
-      { id: 15, name: "DHOS Braintree", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 16, name: "DHOS Peabody", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 17, name: "Fallbrook Elementary", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 18, name: "AMAT Building 4", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 19, name: "St. Gobain", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 20, name: "AMAT Logistics", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 21, name: "AMAT Logistics Early Enablement", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 22, name: "McDonalds Plainville", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 23, name: "Raynham PSF", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 24, name: "Terrain- Wayland", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 25, name: "McDonalds Salem", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 26, name: "Jumbo Capital - 888 Worcester Street", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 27, name: "McDonalds- Nashua/Billerica", executive: "John Perry", pm: "Maggie Laracy", pod: "" },
-      { id: 28, name: "Centech Battery Storage", executive: "John Perry", pm: "Hannah Schur", pod: "" },
-      { id: 29, name: "Speen Street, Natick", executive: "John Perry", pm: "Hannah Schur", pod: "" },
-      { id: 30, name: "Cambridge Residence", executive: "John Perry", pm: "Hannah Schur", pod: "" },
-      { id: 31, name: "Fessenden Dining Hall", executive: "John Perry", pm: "Hannah Schur", pod: "" },
-      { id: 32, name: "AbbVie", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 33, name: "Brockton Yards", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 34, name: "Premier Trailers", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 35, name: "BHS Dining Hall", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 36, name: "Sea Breeze BESS, Bourne", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 37, name: "300 Wellesley Street", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 38, name: "Eversource - Yarmouth", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 39, name: "CHR HV West", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 40, name: "Worcester Housing Authority", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 41, name: "Quonset", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 42, name: "NPS Wellfleet Septic", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 43, name: "241 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 44, name: "240 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 45, name: "Melrose Police", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 46, name: "Melrose Engine 2", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 47, name: "Carvana, Acton", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 48, name: "Melrose Engine 3", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 49, name: "Melrose Central HQ", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 50, name: "Brixmor Lynn", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" },
-      { id: 51, name: "Citi Field, Hardrock Civil + Geotech Support", executive: "Frank Holmes", pm: "Robert Phillips", pod: "" }
+      { id: 1, name: "Hudson", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 2, name: "Natick Senior Housing", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 3, name: "Plumley", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 4, name: "Bedford Shopping Center", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 5, name: "EPE Tewksbury", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 6, name: "Heading Home", executive: "Frank Holmes", pm: "Frank Holmes", pod: "", override: null },
+      { id: 7, name: "Andover H.S.", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 8, name: "Medway Public Safety Complex", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 9, name: "Rhynland Tyngsborough BESS", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 10, name: "Brandeis ADA", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 11, name: "Amazon Douglas", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 12, name: "Centech UPS", executive: "John Perry", pm: "John Perry", pod: "", override: null },
+      { id: 13, name: "Faneuil Gardens", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "", override: null },
+      { id: 14, name: "Trinity Lowell", executive: "Frank Holmes", pm: "Coleman Horsley", pod: "", override: null },
+      { id: 15, name: "DHOS Braintree", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 16, name: "DHOS Peabody", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 17, name: "Fallbrook Elementary", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 18, name: "AMAT Building 4", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 19, name: "St. Gobain", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 20, name: "AMAT Logistics", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 21, name: "AMAT Logistics Early Enablement", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 22, name: "McDonalds Plainville", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 23, name: "Raynham PSF", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 24, name: "Terrain- Wayland", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 25, name: "McDonalds Salem", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 26, name: "Jumbo Capital - 888 Worcester Street", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 27, name: "McDonalds- Nashua/Billerica", executive: "John Perry", pm: "Maggie Laracy", pod: "", override: null },
+      { id: 28, name: "Centech Battery Storage", executive: "John Perry", pm: "Hannah Schur", pod: "", override: null },
+      { id: 29, name: "Speen Street, Natick", executive: "John Perry", pm: "Hannah Schur", pod: "", override: null },
+      { id: 30, name: "Cambridge Residence", executive: "John Perry", pm: "Hannah Schur", pod: "", override: null },
+      { id: 31, name: "Fessenden Dining Hall", executive: "John Perry", pm: "Hannah Schur", pod: "", override: null },
+      { id: 32, name: "AbbVie", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 33, name: "Brockton Yards", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 34, name: "Premier Trailers", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 35, name: "BHS Dining Hall", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 36, name: "Sea Breeze BESS, Bourne", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 37, name: "300 Wellesley Street", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 38, name: "Eversource - Yarmouth", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 39, name: "CHR HV West", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 40, name: "Worcester Housing Authority", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 41, name: "Quonset", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 42, name: "NPS Wellfleet Septic", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 43, name: "241 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 44, name: "240 Sturbridge Road", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 45, name: "Melrose Police", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 46, name: "Melrose Engine 2", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 47, name: "Carvana, Acton", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 48, name: "Melrose Engine 3", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 49, name: "Melrose Central HQ", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 50, name: "Brixmor Lynn", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null },
+      { id: 51, name: "Citi Field, Hardrock Civil + Geotech Support", executive: "Frank Holmes", pm: "Robert Phillips", pod: "", override: null }
     ];
 
-    // --- 2. STATE MANAGEMENT ---
+    // --- 3. STATE MANAGEMENT ---
     let appData = {
-      staff: JSON.parse(localStorage.getItem('bsc_staff')) || INITIAL_STAFF,
-      pods: JSON.parse(localStorage.getItem('bsc_pods')) || INITIAL_PODS,
-      projects: JSON.parse(localStorage.getItem('bsc_projects')) || INITIAL_PROJECTS,
-      workload: JSON.parse(localStorage.getItem('bsc_workload')) || {}
+      staff: JSON.parse(localStorage.getItem('bsc_staff_v4')) || INITIAL_STAFF,
+      pods: INITIAL_PODS,
+      projects: JSON.parse(localStorage.getItem('bsc_projects_v4')) || INITIAL_PROJECTS,
+      workload: JSON.parse(localStorage.getItem('bsc_workload_v4')) || {},
+      expandedProjects: new Set()
     };
 
     function saveData() {
-      localStorage.setItem('bsc_staff', JSON.stringify(appData.staff));
-      localStorage.setItem('bsc_pods', JSON.stringify(appData.pods));
-      localStorage.setItem('bsc_projects', JSON.stringify(appData.projects));
-      localStorage.setItem('bsc_workload', JSON.stringify(appData.workload));
+      localStorage.setItem('bsc_staff_v4', JSON.stringify(appData.staff));
+      localStorage.setItem('bsc_projects_v4', JSON.stringify(appData.projects));
+      localStorage.setItem('bsc_workload_v4', JSON.stringify(appData.workload));
       renderAll();
     }
 
@@ -575,11 +616,25 @@
         appData.pods = INITIAL_PODS;
         appData.projects = INITIAL_PROJECTS;
         appData.workload = {};
+        appData.expandedProjects.clear();
         saveData();
       }
     }
 
-    // --- 3. TAB NAVIGATION ---
+    function getStaff(name) {
+      return appData.staff.find(s => s.name === name) || { name: name || 'Unassigned', role: 'Staff', rate: 0, photo: '' };
+    }
+
+    function getAvatarHtml(name, sizeClass = "w-8 h-8", borderCol = "border-slate-300") {
+      const s = getStaff(name);
+      const initials = name ? name.split(' ').map(n => n[0]).join('') : '?';
+      if (s.photo) {
+        return `<img src="${s.photo}" class="${sizeClass} rounded-full object-cover border ${borderCol} flex-shrink-0" />`;
+      }
+      return `<div class="${sizeClass} rounded-full bg-[#0b2545] text-white flex items-center justify-center font-bold text-[10px] border ${borderCol} flex-shrink-0">${initials}</div>`;
+    }
+
+    // --- 4. TAB NAVIGATION ---
     function switchTab(tabId) {
       document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -593,45 +648,165 @@
       renderAll();
     }
 
-    // --- 4. RENDERERS ---
+    // --- 5. TAB 1: COLLAPSIBLE PROJECTS ---
+    function toggleProjectCollapse(projId) {
+      if (appData.expandedProjects.has(projId)) {
+        appData.expandedProjects.delete(projId);
+      } else {
+        appData.expandedProjects.add(projId);
+      }
+      renderProjectsTable();
+    }
 
-    // TAB 1: PROJECTS TABLE
     function renderProjectsTable() {
       const tbody = document.getElementById('projectsTableBody');
       const search = document.getElementById('projectSearch').value.toLowerCase();
       const filtered = appData.projects.filter(p => p.name.toLowerCase().includes(search));
 
-      const execOptions = ["Frank Holmes", "John Perry"];
-      const pmOptions = ["Robert Phillips", "Maggie Laracy", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry"];
+      const execOptions = ["Frank Holmes", "John Perry", ""];
+      const pmOptions = ["Robert Phillips", "Maggie Laracy", "Liza Kimball", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry", ""];
       const podOptions = appData.pods.map(p => p.name);
 
-      tbody.innerHTML = filtered.map((p, idx) => `
-        <tr class="hover:bg-slate-50 transition">
-          <td class="py-2.5 px-4 text-slate-400 font-mono">${idx + 1}</td>
-          <td class="py-2.5 px-4 font-semibold text-slate-900">${p.name}</td>
-          <td class="py-2.5 px-4">
-            <select onchange="updateProjectField(${p.id}, 'executive', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
-              ${execOptions.map(ex => `<option value="${ex}" ${p.executive === ex ? 'selected' : ''}>${ex}</option>`).join('')}
-            </select>
-          </td>
-          <td class="py-2.5 px-4">
-            <select onchange="updateProjectField(${p.id}, 'pm', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
-              ${pmOptions.map(pm => `<option value="${pm}" ${p.pm === pm ? 'selected' : ''}>${pm}</option>`).join('')}
-            </select>
-          </td>
-          <td class="py-2.5 px-4">
-            <select onchange="updateProjectField(${p.id}, 'pod', this.value)" class="bg-white border ${p.pod ? 'border-blue-400 font-medium text-blue-900 bg-blue-50/50' : 'border-slate-300 text-slate-500'} rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
-              <option value="">-- Assign Pod --</option>
-              ${podOptions.map(pod => `<option value="${pod}" ${p.pod === pod ? 'selected' : ''}>${pod}</option>`).join('')}
-            </select>
-          </td>
-          <td class="py-2.5 px-4 text-center">
-            <button onclick="deleteProject(${p.id})" title="Delete project" class="text-slate-400 hover:text-red-600 transition p-1">
-              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            </button>
-          </td>
-        </tr>
-      `).join('');
+      let html = '';
+
+      filtered.forEach((p, idx) => {
+        const isExpanded = appData.expandedProjects.has(p.id);
+        const pod = appData.pods.find(pd => pd.name === p.pod);
+        const hasOverride = Array.isArray(p.override) && p.override.length > 0;
+
+        html += `
+          <tr class="project-row border-b border-slate-100 transition cursor-pointer" onclick="toggleProjectCollapse(${p.id})">
+            <td class="py-3 px-3 text-center text-slate-400">
+              <i data-lucide="${isExpanded ? 'chevron-down' : 'chevron-right'}" class="w-4 h-4 inline text-blue-600 transition-transform"></i>
+            </td>
+            <td class="py-3 px-3 text-slate-400 font-mono">${idx + 1}</td>
+            <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+              <span>${p.name}</span>
+              ${hasOverride ? `<span class="bg-amber-100 text-amber-800 text-[9px] font-bold px-1.5 py-0.5 rounded border border-amber-300">Override</span>` : ''}
+            </td>
+            <td class="py-3 px-4" onclick="event.stopPropagation()">
+              <select onchange="updateProjectField(${p.id}, 'executive', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+                ${execOptions.map(ex => `<option value="${ex}" ${p.executive === ex ? 'selected' : ''}>${ex || '-- Unassigned --'}</option>`).join('')}
+              </select>
+            </td>
+            <td class="py-3 px-4" onclick="event.stopPropagation()">
+              <select onchange="updateProjectField(${p.id}, 'pm', this.value)" class="bg-white border border-slate-300 rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+                ${pmOptions.map(pm => `<option value="${pm}" ${p.pm === pm ? 'selected' : ''}>${pm || '-- Unassigned --'}</option>`).join('')}
+              </select>
+            </td>
+            <td class="py-3 px-4" onclick="event.stopPropagation()">
+              ${hasOverride ? `
+                <span class="text-xs font-semibold text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200">
+                  Custom: ${p.override.join(', ')}
+                </span>
+              ` : `
+                <select onchange="updateProjectField(${p.id}, 'pod', this.value)" class="bg-white border ${p.pod ? 'border-blue-400 font-semibold text-blue-900 bg-blue-50/50' : 'border-slate-300 text-slate-500'} rounded px-2 py-1 text-xs focus:ring-1 focus:ring-blue-500">
+                  <option value="">-- Assign Pod --</option>
+                  ${podOptions.map(podName => `<option value="${podName}" ${p.pod === podName ? 'selected' : ''}>${podName}</option>`).join('')}
+                </select>
+              `}
+            </td>
+            <td class="py-3 px-4 text-center" onclick="event.stopPropagation()">
+              <button onclick="deleteProject(${p.id})" title="Delete project" class="text-slate-400 hover:text-red-600 transition p-1">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </td>
+          </tr>
+        `;
+
+        // Collapsible Drawer Accordion
+        if (isExpanded) {
+          html += `
+            <tr class="bg-slate-50/90 border-b border-slate-200 animate-in fade-in duration-150">
+              <td colspan="7" class="p-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                  <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-black uppercase tracking-wider bg-blue-100 text-blue-800 px-2 py-0.5 rounded">Condensed Staffing Blueprint</span>
+                      <h4 class="font-bold text-slate-900 text-sm">${p.name}</h4>
+                    </div>
+                    <span class="text-[11px] text-slate-500">Tier 1 &rarr; Tier 2 &rarr; Tier 3 Deployment</span>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- Tier 1 Card -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        ${getAvatarHtml(p.executive, "w-10 h-10", "border-sky-400")}
+                        <div>
+                          <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Tier 1: Executive</span>
+                          <span class="font-bold text-slate-900 text-xs">${p.executive || 'Unassigned'}</span>
+                          <span class="text-[10px] text-slate-500 block">${p.executive ? getStaff(p.executive).role : '—'}</span>
+                        </div>
+                      </div>
+                      ${p.executive ? `<span class="font-mono text-emerald-700 font-bold text-xs bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">$${getStaff(p.executive).rate}/hr</span>` : ''}
+                    </div>
+
+                    <!-- Tier 2 Card -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+                      <div class="flex items-center gap-3">
+                        ${getAvatarHtml(p.pm, "w-10 h-10", "border-blue-500")}
+                        <div>
+                          <span class="text-[9px] font-black uppercase tracking-wider text-slate-400 block">Tier 2: Project Leader</span>
+                          <span class="font-bold text-slate-900 text-xs">${p.pm || 'Unassigned'}</span>
+                          <span class="text-[10px] text-slate-500 block">${p.pm ? getStaff(p.pm).role : '—'}</span>
+                        </div>
+                      </div>
+                      ${p.pm ? `<span class="font-mono text-emerald-700 font-bold text-xs bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">$${getStaff(p.pm).rate}/hr</span>` : ''}
+                    </div>
+
+                    <!-- Tier 3 Card -->
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                      <div class="flex items-center justify-between mb-2">
+                        <span class="text-[9px] font-black uppercase tracking-wider text-slate-400">Tier 3: Execution Staff</span>
+                        ${pod ? `<span class="text-[10px] font-black text-blue-700 bg-blue-100 px-2 py-0.5 rounded">${pod.name}</span>` : ''}
+                        ${hasOverride ? `<span class="text-[10px] font-black text-amber-700 bg-amber-100 px-2 py-0.5 rounded">Custom Staff</span>` : ''}
+                      </div>
+
+                      ${pod ? `
+                        <div class="space-y-1.5">
+                          <div class="flex items-center justify-between bg-white p-1.5 rounded-lg border border-slate-200">
+                            <div class="flex items-center gap-2">
+                              ${getAvatarHtml(pod.senior, "w-7 h-7")}
+                              <span class="font-semibold text-slate-800 text-xs">${pod.senior}</span>
+                            </div>
+                            <span class="font-mono text-[11px] font-bold text-emerald-700">$${getStaff(pod.senior).rate}/hr</span>
+                          </div>
+                          <div class="flex items-center justify-between bg-white p-1.5 rounded-lg border border-slate-200">
+                            <div class="flex items-center gap-2">
+                              ${getAvatarHtml(pod.staff, "w-7 h-7")}
+                              <span class="font-semibold text-slate-800 text-xs">${pod.staff}</span>
+                            </div>
+                            <span class="font-mono text-[11px] font-bold text-emerald-700">$${getStaff(pod.staff).rate}/hr</span>
+                          </div>
+                        </div>
+                      ` : hasOverride ? `
+                        <div class="space-y-1">
+                          ${p.override.map(memberName => `
+                            <div class="flex items-center justify-between bg-white p-1 rounded-lg border border-slate-200">
+                              <div class="flex items-center gap-2">
+                                ${getAvatarHtml(memberName, "w-6 h-6")}
+                                <span class="font-semibold text-slate-800 text-xs">${memberName}</span>
+                              </div>
+                              <span class="font-mono text-[10.5px] font-bold text-emerald-700">$${getStaff(memberName).rate}/hr</span>
+                            </div>
+                          `).join('')}
+                        </div>
+                      ` : `
+                        <span class="text-xs text-slate-400 italic block py-2">No Tier 3 Pod assigned yet.</span>
+                      `}
+                    </div>
+
+                  </div>
+                </div>
+              </td>
+            </tr>
+          `;
+        }
+      });
+
+      tbody.innerHTML = html;
       lucide.createIcons();
     }
 
@@ -639,6 +814,9 @@
       const p = appData.projects.find(item => item.id === id);
       if (p) {
         p[field] = value;
+        if (field === 'pod' && value) {
+          p.override = null;
+        }
         saveData();
       }
     }
@@ -647,7 +825,52 @@
       if (confirm("Delete this project from portfolio?")) {
         appData.projects = appData.projects.filter(p => p.id !== id);
         delete appData.workload[id];
+        appData.expandedProjects.delete(id);
         saveData();
+      }
+    }
+
+    // --- 6. ADD PROJECT MODAL & OVERRIDE LOGIC ---
+    let isOverrideActive = false;
+
+    function openAddProjectModal() {
+      isOverrideActive = false;
+      document.getElementById('overridePanel').classList.add('hidden');
+      document.getElementById('tier3PodSection').classList.remove('hidden');
+      document.getElementById('overrideBtn').innerText = 'Enable Override';
+      document.getElementById('overrideBtn').classList.remove('bg-amber-100', 'border-amber-400', 'text-amber-900');
+      
+      const container = document.getElementById('overrideCheckboxes');
+      container.innerHTML = appData.staff.map(s => `
+        <label class="flex items-center gap-2 p-1.5 rounded bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
+          <input type="checkbox" name="overrideStaff" value="${s.name}" class="rounded text-blue-600 focus:ring-blue-500" />
+          ${getAvatarHtml(s.name, "w-6 h-6")}
+          <div class="truncate">
+            <span class="font-bold text-[11px] text-slate-800 block truncate">${s.name}</span>
+            <span class="text-[9px] text-slate-400">$${s.rate}/hr</span>
+          </div>
+        </label>
+      `).join('');
+
+      openModal('addProjectModal');
+    }
+
+    function toggleOverrideMode() {
+      isOverrideActive = !isOverrideActive;
+      const panel = document.getElementById('overridePanel');
+      const podSec = document.getElementById('tier3PodSection');
+      const btn = document.getElementById('overrideBtn');
+
+      if (isOverrideActive) {
+        panel.classList.remove('hidden');
+        podSec.classList.add('hidden');
+        btn.innerText = 'Disable Override';
+        btn.classList.add('bg-amber-100', 'border-amber-400', 'text-amber-900');
+      } else {
+        panel.classList.add('hidden');
+        podSec.classList.remove('hidden');
+        btn.innerText = 'Enable Override';
+        btn.classList.remove('bg-amber-100', 'border-amber-400', 'text-amber-900');
       }
     }
 
@@ -659,52 +882,116 @@
       const pod = document.getElementById('modalPod').value;
 
       if (!name) return;
+
+      let overrideList = null;
+      if (isOverrideActive) {
+        const checked = Array.from(document.querySelectorAll('input[name="overrideStaff"]:checked')).map(cb => cb.value);
+        if (checked.length > 0) {
+          overrideList = checked;
+        }
+      }
+
       const newId = Date.now();
-      appData.projects.unshift({ id: newId, name, executive, pm, pod });
+      appData.projects.unshift({
+        id: newId,
+        name: name,
+        executive: executive,
+        pm: pm,
+        pod: isOverrideActive ? "" : pod,
+        override: overrideList
+      });
+
+      appData.expandedProjects.add(newId);
       saveData();
       closeModal('addProjectModal');
       document.getElementById('newProjectForm').reset();
     }
 
-    // TAB 2: PODS & STAFF DIRECTORY
-    function renderPodsGrid() {
-      const container = document.getElementById('podsGrid');
-      const pmList = appData.staff.filter(s => s.tier === 'PM' || s.tier === 'Executive');
-      const seniorList = appData.staff.filter(s => s.tier === 'Senior');
-      const staffList = appData.staff.filter(s => s.tier === 'Staff');
+    // --- 7. TAB 2: HIERARCHY & PODS STUDIO ---
+    function renderHierarchyStudio() {
+      // Tier 1 Principals
+      const t1Container = document.getElementById('hierarchyTier1');
+      const t1Staff = appData.staff.filter(s => s.tier === 'Executive');
+      t1Container.innerHTML = t1Staff.map(s => `
+        <div class="bg-[#0f2b48] border border-[#1e4b7a] border-t-2 border-t-sky-400 rounded-xl p-2.5 px-4 flex items-center gap-3 shadow-md min-w-[240px]">
+          ${getAvatarHtml(s.name, "w-10 h-10", "border-sky-400")}
+          <div class="flex-grow">
+            <h4 class="font-bold text-white text-xs">${s.name}</h4>
+            <p class="text-[10px] text-sky-200">${s.role}</p>
+          </div>
+          <span class="font-mono text-emerald-400 font-bold text-xs">$${s.rate}/hr</span>
+        </div>
+      `).join('');
 
-      container.innerHTML = appData.pods.map(pod => `
+      // Tier 2 Project Leaders
+      const t2Container = document.getElementById('hierarchyTier2');
+      const t2Staff = appData.staff.filter(s => s.tier === 'PM');
+      t2Container.innerHTML = t2Staff.map(s => `
+        <div class="bg-white text-slate-800 rounded-xl p-2 px-3.5 flex items-center gap-2.5 shadow-md border-t-4 border-t-blue-600 min-w-[210px]">
+          ${getAvatarHtml(s.name, "w-9 h-9", "border-blue-600")}
+          <div class="flex-grow">
+            <h4 class="font-bold text-slate-900 text-xs">${s.name}</h4>
+            <p class="text-[10px] text-slate-500">${s.role}</p>
+          </div>
+          <span class="font-mono text-emerald-700 font-bold text-xs">$${s.rate}/hr</span>
+        </div>
+      `).join('');
+
+      // Tier 3 Pods
+      const podContainer = document.getElementById('podsGrid');
+      const allStaff = appData.staff;
+      podContainer.innerHTML = appData.pods.map(pod => `
         <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between" style="border-top: 4px solid ${pod.color}">
-          <div class="p-3.5 space-y-3">
-            <div class="flex justify-between items-center">
-              <h3 class="font-bold text-slate-900 text-sm">${pod.name}</h3>
-              <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${pod.color}"></span>
+          <div class="p-4 space-y-3">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+              <h4 class="font-bold text-slate-900 text-sm flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${pod.color}"></span>
+                ${pod.name}
+              </h4>
+              <span class="text-[10px] bg-sky-50 text-sky-700 border border-sky-200 px-2 py-0.5 rounded font-bold">2-Person Pod</span>
             </div>
 
-            <div>
-              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Pod Lead (PM/PE)</label>
-              <select onchange="updatePodMember('${pod.name}', 'lead', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
-                ${pmList.map(s => `<option value="${s.name}" ${pod.lead === s.name ? 'selected' : ''}>${s.name}</option>`).join('')}
-              </select>
-            </div>
+            <div class="space-y-2">
+              <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                ${getAvatarHtml(pod.senior, "w-8 h-8")}
+                <select onchange="updatePodMember('${pod.name}', 'senior', this.value)" class="w-full bg-transparent text-xs font-semibold text-slate-800 focus:outline-none">
+                  ${allStaff.map(s => `<option value="${s.name}" ${pod.senior === s.name ? 'selected' : ''}>${s.name} ($${s.rate}/hr)</option>`).join('')}
+                </select>
+              </div>
 
-            <div>
-              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Senior Technical Staff</label>
-              <select onchange="updatePodMember('${pod.name}', 'senior', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
-                ${seniorList.map(s => `<option value="${s.name}" ${pod.senior === s.name ? 'selected' : ''}>${s.name} ($${s.rate})</option>`).join('')}
-              </select>
-            </div>
-
-            <div>
-              <label class="text-[10px] uppercase tracking-wider font-semibold text-slate-400 block mb-0.5">Staff Engineer</label>
-              <select onchange="updatePodMember('${pod.name}', 'staff', this.value)" class="w-full bg-slate-50 border border-slate-200 rounded px-2 py-1 text-xs font-medium text-slate-800">
-                ${staffList.map(s => `<option value="${s.name}" ${pod.staff === s.name ? 'selected' : ''}>${s.name} ($${s.rate})</option>`).join('')}
-              </select>
+              <div class="flex items-center gap-2 bg-slate-50 p-1.5 rounded-lg border border-slate-200">
+                ${getAvatarHtml(pod.staff, "w-8 h-8")}
+                <select onchange="updatePodMember('${pod.name}', 'staff', this.value)" class="w-full bg-transparent text-xs font-semibold text-slate-800 focus:outline-none">
+                  ${allStaff.map(s => `<option value="${s.name}" ${pod.staff === s.name ? 'selected' : ''}>${s.name} ($${s.rate}/hr)</option>`).join('')}
+                </select>
+              </div>
             </div>
           </div>
-          <div class="bg-slate-50 px-3.5 py-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between">
-            <span>Assigned Projects:</span>
-            <span class="font-bold text-blue-700">${appData.projects.filter(p => p.pod === pod.name).length}</span>
+          <div class="bg-slate-50 px-4 py-2 border-t border-slate-100 text-[11px] text-slate-500 flex justify-between items-center">
+            <span>Combined Delivery Rate:</span>
+            <span class="font-bold text-emerald-700 font-mono text-xs">$${getStaff(pod.senior).rate + getStaff(pod.staff).rate} / hr</span>
+          </div>
+        </div>
+      `).join('');
+
+      // Staff Directory Cards
+      const dirContainer = document.getElementById('staffDirectoryGrid');
+      dirContainer.innerHTML = appData.staff.map(person => `
+        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
+          <div class="relative group cursor-pointer" onclick="triggerPhotoUpload('${person.id}')">
+            ${getAvatarHtml(person.name, "w-12 h-12")}
+            <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-[9px] font-bold">Photo</div>
+            <input type="file" id="file-${person.id}" accept="image/*" class="hidden" onchange="handlePhotoUpload('${person.id}', this)" />
+          </div>
+
+          <div class="flex-grow min-w-0">
+            <h4 class="font-bold text-xs text-slate-900 truncate">${person.name}</h4>
+            <p class="text-[11px] text-slate-500 truncate">${person.role}</p>
+            <div class="mt-1 flex items-center gap-1">
+              <span class="text-[11px] font-bold text-slate-400">$</span>
+              <input type="number" value="${person.rate}" onchange="updateStaffRate('${person.id}', this.value)" class="w-16 px-1.5 py-0.5 border border-slate-300 rounded text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500" />
+              <span class="text-[10px] text-slate-400">/hr</span>
+            </div>
           </div>
         </div>
       `).join('');
@@ -718,38 +1005,7 @@
       }
     }
 
-    function renderStaffDirectory() {
-      const container = document.getElementById('staffDirectoryGrid');
-      container.innerHTML = appData.staff.map(person => {
-        const initials = person.name.split(' ').map(n => n[0]).join('');
-        return `
-          <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex items-center space-x-3">
-            <div class="relative group cursor-pointer" onclick="triggerPhotoUpload('${person.id}')">
-              ${person.photo ? 
-                `<img src="${person.photo}" class="w-12 h-12 rounded-full object-cover border border-slate-300" />` : 
-                `<div class="w-12 h-12 rounded-full bg-[#0b2545] text-white flex items-center justify-center font-bold text-sm tracking-wider shadow-inner">${initials}</div>`
-              }
-              <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition text-white text-[9px] font-bold">Photo</div>
-              <input type="file" id="file-${person.id}" accept="image/*" class="hidden" onchange="handlePhotoUpload('${person.id}', this)" />
-            </div>
-
-            <div class="flex-grow min-w-0">
-              <h4 class="font-bold text-xs text-slate-900 truncate">${person.name}</h4>
-              <p class="text-[11px] text-slate-500 truncate">${person.role}</p>
-              <div class="mt-1 flex items-center gap-1">
-                <span class="text-[11px] font-bold text-slate-400">$</span>
-                <input type="number" value="${person.rate}" onchange="updateStaffRate('${person.id}', this.value)" class="w-16 px-1.5 py-0.5 border border-slate-300 rounded text-xs font-semibold text-slate-800 focus:outline-none focus:ring-1 focus:ring-blue-500" />
-                <span class="text-[10px] text-slate-400">/hr</span>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
-    }
-
-    function triggerPhotoUpload(id) {
-      document.getElementById('file-' + id).click();
-    }
+    function triggerPhotoUpload(id) { document.getElementById('file-' + id).click(); }
 
     function handlePhotoUpload(id, input) {
       if (input.files && input.files[0]) {
@@ -773,10 +1029,10 @@
       }
     }
 
-    // TAB 3: SUMMARY DASHBOARD
+    // --- 8. TAB 3: SUMMARY DASHBOARD ---
     function renderSummaryDashboard() {
       const totalProjs = appData.projects.length;
-      const assignedPodsCount = appData.projects.filter(p => !!p.pod).length;
+      const assignedPodsCount = appData.projects.filter(p => !!p.pod || (Array.isArray(p.override) && p.override.length > 0)).length;
       const pendingPodsCount = totalProjs - assignedPodsCount;
 
       let totalWeeklyHrs = 0;
@@ -790,11 +1046,11 @@
         totalWeeklyHrs += (srHrs + staffHrs);
 
         if (pod) {
-          const srObj = appData.staff.find(s => s.name === pod.senior);
-          const stObj = appData.staff.find(s => s.name === pod.staff);
-          const srRate = srObj ? srObj.rate : 0;
-          const stRate = stObj ? stObj.rate : 0;
-          totalWeeklyCost += (srHrs * srRate) + (staffHrs * stRate);
+          totalWeeklyCost += (srHrs * getStaff(pod.senior).rate) + (staffHrs * getStaff(pod.staff).rate);
+        } else if (Array.isArray(p.override) && p.override.length > 0) {
+          const m1Rate = getStaff(p.override[0]).rate;
+          const m2Rate = p.override.length > 1 ? getStaff(p.override[1]).rate : 0;
+          totalWeeklyCost += (srHrs * m1Rate) + (staffHrs * m2Rate);
         }
       });
 
@@ -806,13 +1062,14 @@
 
       // Executive Breakdown
       const execs = ["Frank Holmes", "John Perry"];
-      const execTbody = document.getElementById('summaryExecBody');
-      execTbody.innerHTML = execs.map(ex => {
+      document.getElementById('summaryExecBody').innerHTML = execs.map(ex => {
         const count = appData.projects.filter(p => p.executive === ex).length;
         const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
         return `
           <tr class="hover:bg-slate-50">
-            <td class="py-2 px-3 font-semibold text-slate-800">${ex}</td>
+            <td class="py-2 px-3 font-semibold text-slate-800 flex items-center gap-2">
+              ${getAvatarHtml(ex, "w-6 h-6")} ${ex}
+            </td>
             <td class="py-2 px-3 text-right font-mono font-bold text-slate-900">${count}</td>
             <td class="py-2 px-3 text-right text-slate-500">${pct}%</td>
           </tr>
@@ -820,14 +1077,15 @@
       }).join('');
 
       // PM Breakdown
-      const pms = ["Robert Phillips", "Maggie Laracy", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry"];
-      const pmTbody = document.getElementById('summaryPmBody');
-      pmTbody.innerHTML = pms.map(pm => {
+      const pms = ["Robert Phillips", "Maggie Laracy", "Liza Kimball", "Hannah Schur", "Coleman Horsley", "Frank Holmes", "John Perry"];
+      document.getElementById('summaryPmBody').innerHTML = pms.map(pm => {
         const count = appData.projects.filter(p => p.pm === pm).length;
         const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
         return `
           <tr class="hover:bg-slate-50">
-            <td class="py-2 px-3 font-semibold text-slate-800">${pm}</td>
+            <td class="py-2 px-3 font-semibold text-slate-800 flex items-center gap-2">
+              ${getAvatarHtml(pm, "w-6 h-6")} ${pm}
+            </td>
             <td class="py-2 px-3 text-right font-mono font-bold text-slate-900">${count}</td>
             <td class="py-2 px-3 text-right text-slate-500">${pct}%</td>
           </tr>
@@ -835,8 +1093,7 @@
       }).join('');
 
       // Pod Breakdown
-      const podTbody = document.getElementById('summaryPodBody');
-      podTbody.innerHTML = appData.pods.map(pod => {
+      document.getElementById('summaryPodBody').innerHTML = appData.pods.map(pod => {
         const count = appData.projects.filter(p => p.pod === pod.name).length;
         const pct = totalProjs ? ((count / totalProjs) * 100).toFixed(1) : 0;
         return `
@@ -852,7 +1109,7 @@
       }).join('');
     }
 
-    // TAB 4: WORKLOAD MATRIX
+    // --- 9. TAB 4: WORKLOAD MATRIX ---
     function renderWorkloadTable() {
       const tbody = document.getElementById('workloadTableBody');
       let grandSrHrs = 0;
@@ -860,6 +1117,7 @@
 
       tbody.innerHTML = appData.projects.map((p, idx) => {
         const pod = appData.pods.find(pd => pd.name === p.pod);
+        const hasOverride = Array.isArray(p.override) && p.override.length > 0;
         const w = appData.workload[p.id] || { srHours: 0, staffHours: 0 };
         const srHrs = parseFloat(w.srHours) || 0;
         const stHrs = parseFloat(w.staffHours) || 0;
@@ -868,20 +1126,24 @@
         grandSrHrs += srHrs;
         grandStaffHrs += stHrs;
 
+        const m1 = pod ? pod.senior : (hasOverride ? p.override[0] : '—');
+        const m2 = pod ? pod.staff : (hasOverride && p.override.length > 1 ? p.override[1] : '—');
+        const isAssigned = !!pod || hasOverride;
+
         return `
           <tr class="hover:bg-slate-50">
             <td class="py-2.5 px-3.5 text-slate-400 font-mono">${idx + 1}</td>
             <td class="py-2.5 px-3.5 font-semibold text-slate-900">${p.name}</td>
             <td class="py-2.5 px-3.5">
-              ${pod ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-white" style="background-color: ${pod.color}">${pod.name}</span>` : `<span class="text-slate-400 italic">None</span>`}
+              ${pod ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold text-white" style="background-color: ${pod.color}">${pod.name}</span>` : hasOverride ? `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">Override</span>` : `<span class="text-slate-400 italic">None</span>`}
             </td>
-            <td class="py-2.5 px-3.5 text-slate-700">${pod ? pod.senior : '—'}</td>
+            <td class="py-2.5 px-3.5 text-slate-700 font-medium">${m1}</td>
             <td class="py-2.5 px-3.5 text-center">
-              <input type="number" min="0" step="0.5" value="${w.srHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'srHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!pod ? 'disabled' : ''} />
+              <input type="number" min="0" step="0.5" value="${w.srHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'srHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!isAssigned ? 'disabled' : ''} />
             </td>
-            <td class="py-2.5 px-3.5 text-slate-700">${pod ? pod.staff : '—'}</td>
+            <td class="py-2.5 px-3.5 text-slate-700 font-medium">${m2}</td>
             <td class="py-2.5 px-3.5 text-center">
-              <input type="number" min="0" step="0.5" value="${w.staffHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'staffHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!pod ? 'disabled' : ''} />
+              <input type="number" min="0" step="0.5" value="${w.staffHours || ''}" placeholder="0" onchange="updateProjectHours(${p.id}, 'staffHours', this.value)" class="w-16 px-2 py-1 text-center border border-slate-300 rounded focus:ring-1 focus:ring-blue-500 text-xs" ${!isAssigned ? 'disabled' : ''} />
             </td>
             <td class="py-2.5 px-3.5 text-right font-mono font-bold text-slate-900">${rowTotal.toFixed(1)} h</td>
           </tr>
@@ -901,7 +1163,7 @@
       saveData();
     }
 
-    // TAB 5: BURN REPORT
+    // --- 10. TAB 5: BURN REPORT ---
     function renderBurnTable() {
       const tbody = document.getElementById('burnTableBody');
       let grandSrBurn = 0;
@@ -909,34 +1171,36 @@
 
       tbody.innerHTML = appData.projects.map((p, idx) => {
         const pod = appData.pods.find(pd => pd.name === p.pod);
+        const hasOverride = Array.isArray(p.override) && p.override.length > 0;
         const w = appData.workload[p.id] || { srHours: 0, staffHours: 0 };
         const srHrs = parseFloat(w.srHours) || 0;
         const stHrs = parseFloat(w.staffHours) || 0;
 
-        let srRate = 0;
-        let stRate = 0;
+        let r1 = 0;
+        let r2 = 0;
         if (pod) {
-          const srObj = appData.staff.find(s => s.name === pod.senior);
-          const stObj = appData.staff.find(s => s.name === pod.staff);
-          if (srObj) srRate = srObj.rate;
-          if (stObj) stRate = stObj.rate;
+          r1 = getStaff(pod.senior).rate;
+          r2 = getStaff(pod.staff).rate;
+        } else if (hasOverride) {
+          r1 = getStaff(p.override[0]).rate;
+          r2 = p.override.length > 1 ? getStaff(p.override[1]).rate : 0;
         }
 
-        const srCost = srHrs * srRate;
-        const stCost = stHrs * stRate;
-        const totalBurn = srCost + stCost;
+        const cost1 = srHrs * r1;
+        const cost2 = stHrs * r2;
+        const totalBurn = cost1 + cost2;
 
-        grandSrBurn += srCost;
-        grandStaffBurn += stCost;
+        grandSrBurn += cost1;
+        grandStaffBurn += cost2;
 
         return `
           <tr class="hover:bg-slate-50">
             <td class="py-2.5 px-3.5 text-slate-400 font-mono">${idx + 1}</td>
             <td class="py-2.5 px-3.5 font-semibold text-slate-900">${p.name}</td>
-            <td class="py-2.5 px-3.5 text-slate-700">${p.pm}</td>
-            <td class="py-2.5 px-3.5">${p.pod || '<span class="text-slate-400 italic">None</span>'}</td>
-            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(srCost).toLocaleString()}</td>
-            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(stCost).toLocaleString()}</td>
+            <td class="py-2.5 px-3.5 text-slate-700">${p.pm || '—'}</td>
+            <td class="py-2.5 px-3.5">${pod ? pod.name : (hasOverride ? 'Override' : '<span class="text-slate-400 italic">None</span>')}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(cost1).toLocaleString()}</td>
+            <td class="py-2.5 px-3.5 text-right font-mono text-slate-600">$${Math.round(cost2).toLocaleString()}</td>
             <td class="py-2.5 px-3.5 text-right font-mono font-bold text-emerald-700">$${Math.round(totalBurn).toLocaleString()}</td>
           </tr>
         `;
@@ -947,7 +1211,7 @@
       document.getElementById('grandTotalBurn').innerText = `$${Math.round(grandSrBurn + grandStaffBurn).toLocaleString()}`;
     }
 
-    // --- 5. EXPORT / BACKUP ---
+    // --- 11. EXPORT & MODAL HELPERS ---
     function exportJSON() {
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData, null, 2));
       const downloadAnchor = document.createElement('a');
@@ -958,15 +1222,13 @@
       downloadAnchor.remove();
     }
 
-    // --- 6. MODAL HELPERS ---
     function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
     function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-    // --- 7. INITIALIZE APP ---
+    // --- 12. INITIALIZE APP ---
     function renderAll() {
       renderProjectsTable();
-      renderPodsGrid();
-      renderStaffDirectory();
+      renderHierarchyStudio();
       renderSummaryDashboard();
       renderWorkloadTable();
       renderBurnTable();
